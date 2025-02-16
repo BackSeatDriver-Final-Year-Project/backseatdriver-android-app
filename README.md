@@ -6,11 +6,11 @@
 
 | **Student**          | Caolán Maguire       |
 |----------------------|--------------------------|
-| **Title**   | "RIP - IRELAND" - AN OBITUARIES LISTINGS APP               |
+| **Title**   | "BACK SEAT DRIER" - TELEMATICS SOLUTION FOR BUSINESSES AND INDIVIDUALS               |
 | **Name**   | Caolán Maguire               |
-| **Student ID**   | g00385433               |
-| **Video Walkthrough**   | [Sharepoint video](https://atlantictu-my.sharepoint.com/:v:/r/personal/g00385433_atu_ie/Documents/Ionic%20App%20-%20Google%20Chrome%202024-12-22%2021-52-57.mp4?csf=1&web=1&e=oaXquy&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D) [Youtube Video Repo Walkthrough](https://youtu.be/6yTpjsbDIMk)  |
-| **About**   | With the recent news of RIP.IE charging undertakers and customers 100 euros for a listing, I decided to develop my ACPAD project into a useful tool to demonstrate how technically simple this application is and how competition should be encouraged. For this project, I had to setup a public API and database which I hosted on <a href="render.com">render.com</a> and I'll keep this API up until this project is graded.               |
+| **Student ID**   | G00385433               |
+| **Video Walkthrough**   |  |
+| **About**   | For my FYP I've developed a telematics solution - whereas the mobile phone connects to a bluetooth OBD-II scanner connected to a vehicle - using the sensors on the car and on the mobile phone we calculate certain statistics and advice to deliver to the user via an online portal.               |
 
 <!--<img src="https://github.com/caolanmaguire/calsickofthis/blob/main/9em9ov.gif">-->
 
