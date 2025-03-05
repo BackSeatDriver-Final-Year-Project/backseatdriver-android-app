@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/onsenui/css/onsenui.css">
+    <link rel="stylesheet" href="https://unpkg.com/onsenui/css/onsen-css-components.min.css">
+    <script src="https://unpkg.com/onsenui/js/onsenui.min.js"></script>
+    <!-- <script src="js/controls.js"></script> -->
+    <link rel="stylesheet" type="text/css" href="style/styles.css" />
+    <style>
+        ons-tab[active] {
+            box-shadow: 0 6px 5px -4px #c3d600 !important;
+        }
+
+        .text-input:invalid {
+            width: 92% !important;
+            margin-left: 15px !important;
+        }
+
+        ul li {
+            background-color: rgb(111, 66, 193);
+            border-radius: 7px;
+            border: 1px solid white;
+            padding: 10px;
+            width: 80%;
+            margin-bottom: 5px;
+            color: white;
+            margin-left: 10%;
+        }
+
+        ul {
+            padding-left: 0;
+        }
+
+        textarea,
+        input[type="submit"] {
+            border: 1px solid white;
+            background: transparent;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <ons-navigator id="appNavigator" swipeable swipe-target-width="80px">
+        <ons-page>
+            <ons-splitter id="appSplitter">
+                <ons-splitter-side id="sidemenu" page="sidemenu.html" swipeable side="right" collapse=""
+                    width="260px"></ons-splitter-side>
+                <ons-splitter-content page="tabbar.html"></ons-splitter-content>
+            </ons-splitter>
+        </ons-page>
+    </ons-navigator>
+
+    <template id="tabbar.html">
+        <ons-page id="tabbar-page">
+            <ons-toolbar>
+                <div class="center">Select Vehicle / Asset</div>
+                <div class="right"></div>
+            </ons-toolbar>
+            <ons-tabbar swipeable id="appTabbar" position="auto">
+                <ons-tab label="login" icon="md-home" page="dashboard.html" active></ons-tab>
+            </ons-tabbar>
+
+            <script>
+                ons.getScriptPage().addEventListener('prechange', function (event) {
+                    if (event.target.matches('#appTabbar')) {
+                        event.currentTarget.querySelector('ons-toolbar .center').innerHTML = event.tabItem.getAttribute('label');
+                    }
+                });
+            </script>
+        </ons-page>
+    </template>
+
+    <template id="dashboard.html">
+        <ons-page>
+            <br />
+            <span>
+                <ul id="vehicleList" style="list-style: none;">
+                    <li>Loading vehicles...</li>
+                </ul>
+            </span>
+        </ons-page>
+    </template>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            fetchVehicles();
+        });
+
+        function fetchVehicles() {
+            const token = localStorage.getItem("logintoken"); // Retrieve stored auth token
+
+            if (!token) {
+                console.error("No authentication token found.");
+                return;
+            }
+
+            fetch("https://backseatdriver-ie-api.onrender.com/vehicles", {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Failed to fetch vehicles.");
+                }
+                return response.json();
+            })
+            .then(data => {
+                populateVehicleList(data);
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                document.getElementById("vehicleList").innerHTML = "<li>Failed to load vehicles.</li>";
+            });
+        }
+
+        function populateVehicleList(vehicles) {
+            const ul = document.getElementById("vehicleList");
+            ul.innerHTML = ""; // Clear existing list
+
+            if (vehicles.length === 0) {
+                ul.innerHTML = "<li>No vehicles found.</li>";
+                return;
+            }
+
+            vehicles.forEach(vehicle => {
+                const li = document.createElement("li");
+
+                li.innerHTML = `
+                    <i style="position: absolute; float: right; text-align: right; width: 76%; font-size: 25px;">&#128663;</i>
+                    <h4>${vehicle.name}</h4>
+                    <p>VID: ${vehicle.VID}</p>
+                    <hr>
+                    <input type="submit" value="SELECT" onclick="selectVehicle('${vehicle.VID}')">
+                `;
+
+                ul.appendChild(li);
+            });
+        }
+
+        function selectVehicle(vehicleId) {
+            localStorage.setItem("VID",vehicleId)
+            location.href = 'app.html';
+            // console.log("Selected Vehicle ID:", vehicleId);
+            // alert(`Vehicle ${vehicleId} selected!`);
+        }
+    </script>
+</body>
+
+</html>

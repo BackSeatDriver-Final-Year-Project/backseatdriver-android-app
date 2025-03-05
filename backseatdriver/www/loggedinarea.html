@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/onsenui/css/onsenui.css">
+    <link rel="stylesheet" href="https://unpkg.com/onsenui/css/onsen-css-components.min.css">
+    <script src="https://unpkg.com/onsenui/js/onsenui.min.js"></script>
+    <script src="js/controls.js"></script>
+    <link rel="stylesheet" type="text/css" href="style/styles.css" />
+    <style>
+        ons-tab[active] {
+            box-shadow: 0 6px 5px -4px #c3d600 !important;
+        }
+    </style>
+</head>
+
+<body>
+    <ons-navigator id="appNavigator" swipeable swipe-target-width="80px">
+        <ons-page>
+            <ons-splitter id="appSplitter">
+                <ons-splitter-side id="sidemenu" page="sidemenu.html" swipeable side="right" collapse=""
+                    width="260px"></ons-splitter-side>
+                <ons-splitter-content page="tabbar.html"></ons-splitter-content>
+            </ons-splitter>
+        </ons-page>
+    </ons-navigator>
+
+    <template id="tabbar.html">
+        <ons-page id="tabbar-page">
+            <ons-toolbar>
+                <div class="center">Make a quote</div>
+                <div class="right">
+                    <ons-toolbar-button onclick="fn.toggleMenu()">
+                        <ons-icon icon="ion-ios-menu, material:md-menu"></ons-icon>
+                    </ons-toolbar-button>
+                </div>
+            </ons-toolbar>
+            <ons-tabbar swipeable id="appTabbar" position="auto">
+                <ons-tab label="Dashboard" icon="md-home" page="dashboard.html" active></ons-tab>
+                <!-- <ons-tab label="Make a quote" icon="ion-ios-create" page="home.html" active></ons-tab> -->
+                <!-- <ons-tab label="Make a quote" icon="ion-ios-create" page="forms.html"></ons-tab> -->
+                <ons-tab label="Settings" icon="ion-ios-film" page="settings.html"></ons-tab>
+            </ons-tabbar>
+
+            <script>
+                ons.getScriptPage().addEventListener('prechange', function (event) {
+                    if (event.target.matches('#appTabbar')) {
+                        event.currentTarget.querySelector('ons-toolbar .center').innerHTML = event.tabItem.getAttribute('label');
+                    }
+                });
+            </script>
+        </ons-page>
+    </template>
+
+    <template id="sidemenu.html">
+        <ons-page>
+            <p>side menu</p>
+        </ons-page>
+    </template>
+
+    <template id="dashboard.html">
+        <ons-page>
+            <br/>
+            <button class="button button--large--cta" style="width: 95%; margin: 0 auto;">+ Connect to a bluetooth module</button>
+            <br/>
+            <button disabled class="button button--large--cta" style="width: 95%; margin: 0 auto; background-color: green;">Start Journey</button>
+            <br/>
+            <button disabled class="button button--large--cta" style="width: 95%; margin: 0 auto; background-color: red;">End Journey</button>
+            
+            <br/>
+            <b style="color: green;">Connected to: OBD Bluetooth Dongle</b> <br/>
+            <b style="color: green;">Vehicle: Connected</b>
+            <br/>
+
+            <br/>
+                <a href="login.html">login page</a>
+            <br/>
+            
+            <label>Analysis</label><hr/>
+
+            <div id="tile">
+                <p>23</p> <small>mph</small>
+                <b>Vehicle Speed</b>
+            </div>
+
+            <div id="tile">
+                <p>23</p>  <small>rpm</small>
+                <b>Engine RPM</b>
+            </div>
+
+            <div id="tile">
+                <p>23</p>  <small>degree</small>
+                <b>Engine coolant</b>
+            </div>
+
+            <div id="tile">
+                <p>23</p>  <small>degrees</small>
+                <b>Intake Air</b>
+            </div>
+            
+        
+        </ons-page>
+    </template>
+
+    <!-- end of test -->
+
+
+
+
+    <template id="settings.html">
+        <ons-page>
+            <br/><br/><br/>
+            <input type="search" value="" placeholder="Search" class="search-input search-input--material" style="width: 95%; margin: 0 auto; margin-left:10px;"> <br/><br/>
+            
+            <p>Vehicles connected to this account</p>
+            <ul class="list list--inset">
+                <!-- <li>My Vehicles</li> -->
+                <li class="list-item list--inset__item list-item--chevron list-item--tappable">
+                  <div class="list-item__center">List Item with Chevron</div>
+                </li>
+                <li class="list-item list--inset__item list-item--chevron list-item--tappable">
+                  <div class="list-item__center">List Item with Chevron</div>
+                </li>
+              </ul>
+            <br/>
+            <button class="button button--large--cta" style="width: 95%; margin: 0 auto; background-color: red;">Log out</button>
+        </ons-page>
+    </template>
+
+    <template id="pullHook.html">
+        <ons-page>
+            <ons-toolbar>
+                <div class="left">
+                    <ons-back-button>Home</ons-back-button>
+                    <!-- <img style="padding:10px; background:black; width:100px;" src="https://www.monaghanwhiskeysociety.com/wp-content/uploads/2023/11/aughey-screens-logo.png">  -->
+                </div>
+                <div class="center"></div>
+            </ons-toolbar>
+
+            <ons-pull-hook id="pull-hook" threshold-height="120px">
+                <ons-icon id="pull-hook-icon" size="22px" class="pull-hook-content" icon="fa-arrow-down"></ons-icon>
+            </ons-pull-hook>
+
+            <!-- <p>Aughey Screens have not yet responded to this quote - please come back later</p> -->
+
+            <div id="wrapper">
+                <h1 id="card-title">Title</h1>
+                <h4 id="card-sub-title">sub-title</h4>
+                <!-- <br/> -->
+
+                <br />
+                <h5 style="font-weight:600;">Your quote</h5>
+                <hr>
+                <table border="0" cellspacing="0" style="width:100%; font-weight:600; text-align:left;">
+                    <tr>
+                        <td>Mesh type</td>
+                        <td>
+                            <p id="mesh-type-label"></p>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Apperature</td>
+                        <td>
+                            <p id="apperature-label"></p>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>previous purchase num</td>
+                        <td>
+                            <p id="purchase-num-label"></p>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Machine type</td>
+                        <td>
+                            <p id="machine-type-label"></p>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Delivery</td>
+                        <td>
+                            <p id="delivery-label"></p>
+                        </td>
+                    </tr>
+
+                </table>
+                <br />
+
+                <h5 style="font-weight:600;">Our Response</h5>
+                <hr>
+                <div id="iframe-section">
+                </div>
+                <!-- <input type="submit" value="purchase"/> -->
+            </div>
+
+            <!-- <ons-list id="kitten-list">
+                <ons-list-header>Pull to refresh</ons-list-header>
+            </ons-list> -->
+
+
+            <script>
+                ons.getScriptPage().onInit = function () {
+                    this.querySelector('ons-toolbar div.center').textContent = this.data.title['title'];
+                    console.log(this.data.title['title']);
+                    console.log(this)
+
+
+                    document.getElementById('card-title').innerHTML = 'Quote Num #' + this.data.title['id'];
+                    document.getElementById('card-sub-title').innerHTML = 'quote made : ' + this.data.title['datetime_quote_made'];
+                    document.getElementById('mesh-type-label').innerHTML = this.data.title['mesh_type'];
+                    document.getElementById('apperature-label').innerHTML = this.data.title['apperature'];
+                    document.getElementById('delivery-label').innerHTML = this.data.title['delivery'];
+                    document.getElementById('purchase-num-label').innerHTML = this.data.title['purchased_before'];
+                    document.getElementById('machine-type-label').innerHTML = this.data.title['machine_type'];
+
+                    // IFrame
+                    var ifrm = document.createElement("iframe");
+                    ifrm.setAttribute("src", "/admin/old/display.php?id=" + this.data.title['id']);
+                    ifrm.setAttribute("style", "border:0px solid black;");
+                    ifrm.style.width = "100%";
+                    ifrm.style.height = "480px";
+                    document.getElementById('iframe-section').appendChild(ifrm);
+
+
+                    // document.getElementById('email-query').value = this.data.title['id'];
+                    var pullHook = document.getElementById('pull-hook');
+                    var icon = document.getElementById('pull-hook-icon');
+                    pullHook.addEventListener('changestate', function (event) {
+                        switch (event.state) {
+                            case 'initial':
+                                icon.setAttribute('icon', 'fa-arrow-down');
+                                icon.removeAttribute('rotate');
+                                icon.removeAttribute('spin');
+                                break;
+                            case 'preaction':
+                                icon.setAttribute('icon', 'fa-arrow-down');
+                                icon.setAttribute('rotate', '180');
+                                icon.removeAttribute('spin');
+                                break;
+                            case 'action':
+                                icon.setAttribute('icon', 'fa-spinner');
+                                icon.removeAttribute('rotate');
+                                icon.setAttribute('spin', true);
+                                break;
+                        }
+                    });
+                    //     var getRandomName = function() {
+                    //         const names = ['Oscar', 'Max', 'Tiger', 'Sam', 'Misty', 'Simba', 'Coco', 'Chloe', 'Lucy', 'Missy'];
+                    //         return names[Math.floor(Math.random() * names.length)];
+                    //     };
+                    //     var getRandomUrl = function() {
+                    //         const width = 40 + Math.floor(20 * Math.random());
+                    //         const height = 40 + Math.floor(20 * Math.random());
+                    //         return `https://placekitten.com/g/${width}/${height}`;
+                    //     };
+                    //     var getRandomKitten = function() {
+                    //         return {
+                    //             name: getRandomName(),
+                    //             url: getRandomUrl()
+                    //         };
+                    //     };
+                    //     var getRandomData = function() {
+                    //         const data = [];
+                    //         for (var i = 0; i < 8; i++) {
+                    //             data.push(getRandomKitten());
+                    //         }
+                    //         return data;
+                    //     };
+                    //     var createKitten = function(kitten) {
+                    //         return ons.createElement(`
+                    //     <ons-list-item>
+                    //       <div class="left">
+                    //         <img class="list-item__thumbnail" src="${kitten.url}">
+                    //       </div>
+                    //       <div class="center">${kitten.name}</div>
+                    //     </ons-list-item>
+                    //   `);
+                    //     };
+                    //     var kittens = getRandomData();
+                    //     for (kitty of kittens) {
+                    //         var kitten = createKitten(kitty);
+                    //         document.getElementById('kitten-list').appendChild(kitten);
+                    //     };
+                    //     pullHook.onAction = function(done) {
+                    //         setTimeout(function() {
+                    //             document.getElementById('kitten-list').appendChild(createKitten(getRandomKitten()));
+                    //             done();
+                    //         }, 400);
+                    //     }
+                };
+            </script>
+
+            <style>
+                .pull-hook-content {
+                    color: #666;
+                    transition: transform .25s ease-in-out;
+                }
+            </style>
+        </ons-page>
+    </template>
+
+    <template id="dialogs.html">
+        <ons-page id="dialogs-page">
+            <ons-toolbar>
+                <div class="left">
+                    <ons-back-button>Home</ons-back-button>
+                </div>
+                <div class="center"></div>
+                <div class="right">
+                    <ons-toolbar-button id="info-button" onclick="fn.showDialog('popover-dialog')"></ons-toolbar-button>
+                </div>
+            </ons-toolbar>
+
+            <ons-list-title>Notifications</ons-list-title>
+            <ons-list modifier="inset">
+                <ons-list-item tappable modifier="longdivider" onclick="ons.notification.alert('Hello, world!')">
+                    <div class="center">
+                        Alert
+                    </div>
+                </ons-list-item>
+                <ons-list-item tappable modifier="longdivider" onclick="ons.notification.confirm('Are you ready?')">
+                    <div class="center">
+                        Simple Confirmation
+                    </div>
+                </ons-list-item>
+                <ons-list-item tappable modifier="longdivider" onclick="ons.notification.prompt('What is your name?')">
+                    <div class="center">
+                        Prompt
+                    </div>
+                </ons-list-item>
+                <ons-list-item tappable modifier="longdivider"
+                    onclick="ons.notification.toast('Hi there!', { buttonLabel: 'Dismiss', timeout: 1500 })">
+                    <div class="center">
+                        Toast
+                    </div>
+                </ons-list-item>
+                <ons-list-item tappable modifier="longdivider"
+                    onclick="ons.openActionSheet({ buttons: ['Label 1', 'Label 2', 'Label 3', 'Cancel'], destructive: 2, cancelable: true })">
+                    <div class="center">
+                        Action/Bottom Sheet
+                    </div>
+                </ons-list-item>
+            </ons-list>
+
+            <ons-list-title>Components</ons-list-title>
+            <ons-list modifier="inset">
+                <ons-list-item tappable modifier="longdivider" onclick="fn.showDialog('lorem-dialog')">
+                    <div class="center">
+                        Simple Dialog
+                    </div>
+                </ons-list-item>
+                <ons-list-item tappable modifier="longdivider" onclick="fn.showDialog('watHmmSure-dialog')">
+                    <div class="center">
+                        Alert Dialog
+                    </div>
+                </ons-list-item>
+                <ons-list-item tappable modifier="longdivider" onclick="fn.showDialog('toast-dialog')">
+                    <div class="center">
+                        Toast (top)
+                    </div>
+                </ons-list-item>
+                <ons-list-item tappable modifier="longdivider" onclick="fn.showDialog('modal-dialog')">
+                    <div class="center">
+                        Modal
+                    </div>
+                </ons-list-item>
+                <ons-list-item tappable modifier="longdivider" onclick="fn.showDialog('popover-dialog')">
+                    <div class="center">
+                        Popover - MD Menu
+                    </div>
+                </ons-list-item>
+                <ons-list-item tappable modifier="longdivider" onclick="fn.showDialog('action-sheet-dialog')">
+                    <div class="center">
+                        Action/Bottom Sheet
+                    </div>
+                </ons-list-item>
+            </ons-list>
+
+            <!-- Components -->
+            <ons-dialog id="lorem-dialog" cancelable>
+                <!-- Optional page. This could contain a Navigator as well. -->
+                <ons-page>
+                    <ons-toolbar>
+                        <div class="center">Simple Dialog</div>
+                    </ons-toolbar>
+                    <p style="text-align: center">Lorem ipsum dolor</p>
+                    <p style="text-align: center">
+                        <ons-button modifier="light" onclick="fn.hideDialog('lorem-dialog')">Close</ons-button>
+                    </p>
+                </ons-page>
+            </ons-dialog>
+
+            <ons-alert-dialog id="watHmmSure-dialog" cancelable>
+                <div class="alert-dialog-title">Hey!!</div>
+                <div class="alert-dialog-content">
+                    Lorem ipsum
+                    <ons-icon icon="fa-commenting-o"></ons-icon>
+                </div>
+                <div class="alert-dialog-footer">
+                    <button class="alert-dialog-button" onclick="fn.hideDialog('watHmmSure-dialog')">Wat</button>
+                    <button class="alert-dialog-button" onclick="fn.hideDialog('watHmmSure-dialog')">Hmm</button>
+                    <button class="alert-dialog-button" onclick="fn.hideDialog('watHmmSure-dialog')">Sure</button>
+                </div>
+            </ons-alert-dialog>
+
+            <ons-toast id="toast-dialog" animation="fall">Supercalifragilisticexpialidocious<button
+                    onclick="fn.hideDialog('toast-dialog')">No way</button></ons-toast>
+
+            <ons-modal id="modal-dialog" onclick="fn.hideDialog('modal-dialog')">
+                <p style="text-align: center">
+                    Loading
+                    <ons-icon icon="fa-spinner" spin></ons-icon>
+                    <br><br> Click or wait
+                </p>
+            </ons-modal>
+
+            <ons-popover id="popover-dialog" cancelable direction="down" cover-target target="#info-button">
+                <ons-list id="popover-list">
+                    <ons-list-item class="more-options" tappable onclick="fn.hideDialog('popover-dialog')">
+                        <div class="center">Call history</div>
+                    </ons-list-item>
+                    <ons-list-item class="more-options" tappable onclick="fn.hideDialog('popover-dialog')">
+                        <div class="center">Import/export</div>
+                    </ons-list-item>
+                    <ons-list-item class="more-options" tappable onclick="fn.hideDialog('popover-dialog')">
+                        <div class="center">New contact</div>
+                    </ons-list-item>
+                    <ons-list-item class="more-options" tappable onclick="fn.hideDialog('popover-dialog')">
+                        <div class="center">Settings</div>
+                    </ons-list-item>
+                </ons-list>
+            </ons-popover>
+
+            <ons-action-sheet id="action-sheet-dialog" cancelable>
+                <ons-action-sheet-button onclick="fn.hideDialog('action-sheet-dialog')" icon="md-square-o">Action
+                    1</ons-action-sheet-button>
+                <ons-action-sheet-button onclick="fn.hideDialog('action-sheet-dialog')" icon="md-square-o">Action
+                    2</ons-action-sheet-button>
+                <ons-action-sheet-button onclick="fn.hideDialog('action-sheet-dialog')" modifier="destructive"
+                    icon="md-square-o">Action 3</ons-action-sheet-button>
+                <ons-action-sheet-button onclick="fn.hideDialog('action-sheet-dialog')"
+                    icon="md-square-o">Cancel</ons-action-sheet-button>
+            </ons-action-sheet>
+
+            <script>
+                ons.getScriptPage().onInit = function () {
+                    this.querySelector('ons-toolbar div.center').textContent = this.data.title;
+                    var toolbarButton = ons.platform.isAndroid() ? ons.createElement(`<ons-icon icon="md-more-vert"></ons-icon>`) : ons.createElement(`<span>More</span>`);
+                    var infoButton = document.getElementById('info-button');
+                    infoButton.appendChild(toolbarButton);
+                    var toastDialog = document.getElementById('toast-dialog');
+                    toastDialog.parentNode.removeChild(toastDialog);
+                    document.getElementById('dialogs-page').appendChild(toastDialog);
+                    var timeoutID = 0;
+                    window.fn.showDialog = function (id) {
+                        var elem = document.getElementById(id);
+                        if (id === 'popover-dialog') {
+                            elem.show(infoButton);
+                        } else {
+                            elem.show();
+                            if (id === 'modal-dialog') {
+                                clearTimeout(timeoutID);
+                                timeoutID = setTimeout(function () {
+                                    fn.hideDialog(id)
+                                }, 2000);
+                            }
+                        }
+                    };
+                    window.fn.hideDialog = function (id) {
+                        document.getElementById(id).hide();
+                    };
+                    const moreOptions = document.querySelectorAll('.more-options');
+                    if (!ons.platform.isAndroid()) {
+                        document.getElementById('watHmmSure-dialog').setAttribute('modifier', 'rowfooter');
+                        for (option of moreOptions) {
+                            option.hasAttribute('modifier') ?
+                                option.setAttribute('modifier', option.getAttribute('modifier') + ' longdivider') :
+                                option.setAttribute('modifier', 'longdivider');
+                        }
+                    } else {
+                        for (option of moreOptions) {
+                            option.hasAttribute('modifier') ?
+                                option.setAttribute('modifier', option.getAttribute('modifier') + ' nodivider') :
+                                option.setAttribute('modifier', 'nodivider');
+                        }
+                    }
+                };
+                document.getElementById('appNavigator').topPage.onDestroy = function () {
+                    var toastDialog = document.getElementById('toast-dialog');
+                    toastDialog.parentNode.removeChild(toastDialog);
+                    document.querySelector('#dialogs-page .page__content').appendChild(toastDialog);
+                }
+            </script>
+
+            <style>
+                #lorem-dialog .dialog-container {
+                    height: 200px;
+                }
+
+                ons-list-title {
+                    margin-top: 20px;
+                }
+            </style>
+        </ons-page>
+    </template>
+
+
+    <template id="transition.html">
+        <ons-page>
+            <ons-toolbar>
+                <div class="left">
+                    <ons-back-button>Animations</ons-back-button>
+                </div>
+                <div class="center"></div>
+            </ons-toolbar>
+            <p style="text-align: center">
+                Use the VOnsBackButton
+            </p>
+            <script>
+                ons.getScriptPage().onInit = function () {
+                    this.querySelector('ons-toolbar div.center').textContent = this.data.title;
+                }
+            </script>
+        </ons-page>
+    </template>
+
+
+
+</body>
+
+</html>

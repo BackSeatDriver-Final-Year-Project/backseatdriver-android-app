@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>OBD2 Reader - Live Signals</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimal-ui">
+    <script src="cordova.js"></script>
+
+    <!-- Include Leaflet.js for Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        #map {
+            width: 100%;
+            height: 400px;
+            margin-top: 20px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Back Seat Driver</h1>
+    <h4>Account: <b id="user_id"></b></h4>
+
+    <!-- <input type="text" value="123456789ABC" id="current_VID" /> -->
+
+
+
+    <h3>Device Status</h3>
+    <!-- <input type="submit"  value="update phone device status" onclick="updateDeviceStatus(current_vid, status.level, status.isPlugged, 'device')"/> -->
+    <table border="1" width="60%" align="center">
+        <tr>
+            <th>Label</th>
+            <th>Data</th>
+        </tr>
+        <tr>
+            <td>Battery Level</td>
+            <td><b id="battery-level">Loading...</b></td>
+        </tr>
+        <tr>
+            <td>Charging Status</td>
+            <td><b id="charging-status">Loading...</b></td>
+        </tr>
+    </table>
+
+    <h3>Live Location</h3>
+    <p><b id="location-tag">Waiting for location...</b></p>
+
+    <!-- Map Container -->
+    <div id="map"></div>
+
+    <script>
+
+        document.getElementById('user_id').innerHTML = localStorage.getItem('logintoken');
+
+        document.addEventListener("deviceready", function () {
+            // Initialize map
+            var map = L.map('map').setView([53.3498, -6.2603], 13); // Default to Dublin
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            var marker = L.marker([53.3498, -6.2603]).addTo(map); // Placeholder marker
+
+            // Battery Status Listener
+            window.addEventListener("batterystatus", function (status) {
+                document.getElementById("battery-level").innerText = status.level + "%";
+                document.getElementById("charging-status").innerText = status.isPlugged ? "Charging" : "Not Charging";
+                current_vid = localStorage.getItem('VID');
+                updateDeviceStatus(current_vid, status.level, status.isPlugged, "device");
+            }, false);
+
+            // Journey Mapping
+            journey_mapping = [];
+
+
+            async function updateVehicleLocation(VID, latitude, longitude) {
+                try {
+                    const response = await fetch('https://backseatdriver-ie-api.onrender.com/update-location', {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ VID, latitude, longitude })
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(data.message || 'Failed to update location');
+                    }
+
+                    console.log('Success:', data.message);
+                } catch (error) {
+                    console.error('Error:', error.message);
+                }
+            }
+
+            async function updateDeviceStatus(VID, device_charging_level, device_charging_status, connected_device_name) {
+                try {
+                    const response = await fetch('https://backseatdriver-ie-api.onrender.com/update-device-status', {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ VID, device_charging_level, device_charging_status, connected_device_name })
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(data.message || 'Failed to update device status');
+                    }
+
+                    console.log('Success:', data.message);
+                } catch (error) {
+                    console.error('Error:', error.message);
+                }
+            }
+
+
+
+            // Function to update location every second
+            function updateLocation() {
+                navigator.geolocation.getCurrentPosition(
+                    function (position) {
+                        var lat = position.coords.latitude;
+                        var lng = position.coords.longitude;
+
+                        // Update displayed coordinates
+                        document.getElementById("location-tag").innerText = `Lat: ${lat}, Lng: ${lng}`;
+                        current_vid = localStorage.getItem('VID');
+
+                        updateVehicleLocation(current_vid, lat, lng);
+
+                        // Move marker on map
+                        marker.setLatLng([lat, lng]);
+                        map.setView([lat, lng], 13);
+                    },
+                    function (error) {
+                        console.log("Location Error: " + error.message);
+                    },
+                    { enableHighAccuracy: true }
+                );
+            }
+
+            // Run location update every second
+            setInterval(updateLocation, 5000);
+        }, false);
+    </script>
+</body>
+
+</html>

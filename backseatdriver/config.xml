@@ -1,11 +1,46 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="ie.backseatdriver.app" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="io.cordova.hellocordova" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>BackSeatDriver</name>
     <description>Sample Apache Cordova App</description>
     <author email="dev@cordova.apache.org" href="https://cordova.apache.org">
         Apache Cordova Team
     </author>
     <content src="index.html" />
+    
+    <!-- Allow External Navigation -->
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
+
+    <!-- Icon and Splash Screen Configuration -->
+    <platform name="android">
+        <!-- Application Icon -->
+        <icon src="res/icon/android/mdpi.png" density="mdpi" />
+        <!-- <icon src="res/android/icon-72x72.png" density="hdpi" /> -->
+        <icon src="res/icon/android/xhdpi.png" density="xhdpi" />
+        <icon src="res/icon/android/xxhdpi.png" density="xxhdpi" />
+        <icon src="res/icon/android/xxxhdpi.png" density="xxxhdpi" />
+
+        <!-- Splash Screen Configuration -->
+        <!-- <preference name="AndroidWindowSplashScreenAnimatedIcon" value="res/android/splash.png" /> -->
+        <preference name="AndroidSplashScreenBackgroundColor" value="#FFFFFF" />
+        <preference name="AndfroidSplashScreenDuration" value="3000" />
+        <preference name="ShowSplashScreen" value="true" />
+        <preference name="AutoHideSplashScreen" value="true" />
+        <preference name="SplashScreenDelay" value="3000" />
+    </platform>
+
+    <platform name="ios">
+        <!-- Application Icon -->
+        <icon src="res/ios/icon.png" width="180" height="180" />
+        <icon src="res/ios/icon-120x120.png" width="120" height="120" />
+        <icon src="res/ios/icon-152x152.png" width="152" height="152" />
+        <icon src="res/ios/icon-167x167.png" width="167" height="167" />
+        <icon src="res/ios/icon-1024x1024.png" width="1024" height="1024" />
+
+        <!-- Splash Screen Configuration -->
+        <preference name="SplashScreen" value="res/ios/splash.png" />
+        <preference name="SplashScreenBackgroundColor" value="#FFFFFF" />
+        <preference name="SplashScreenDelay" value="3000" />
+        <preference name="AutoHideSplashScreen" value="true" />
+    </platform>
 </widget>
