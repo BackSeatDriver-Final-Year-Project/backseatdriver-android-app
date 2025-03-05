@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>OBD2 Reader - Update Signal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimal-ui">
+    <script src="cordova.js"></script>
+    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        table {
+            width: 60%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+
+        h4 {
+            margin-top: 20px;
+        }
+
+        #number-input {
+            font-size: 20px;
+            padding: 10px;
+            margin-top: 20px;
+        }
+
+        .result-container {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Back Seat Driver</h1>
+    <h4>Account: <b id="user_id"></b></h4>
+
+    <!-- Number Input to Update API -->
+    <h3>Update Vehicle Signal</h3>
+    <input type="number" id="number-input" value="0" min="0" max="100" step="1">
+    <div class="result-container">
+        <p>Current Value: <span id="current-value">0</span></p>
+    </div>
+
+    <script>
+        // Setup Socket.IO client connection
+        const socket = io('https://your-backend-url'); // Replace with your backend URL
+
+        document.getElementById('user_id').innerHTML = localStorage.getItem('logintoken');
+
+        document.addEventListener("deviceready", function () {
+            // Emit vehicle signal change to the backend via Socket.IO
+            function updateVehicleSignal(value) {
+                const VID = localStorage.getItem('VID'); // Get vehicle ID from localStorage
+
+                // Emit the signal change to the server via socket
+                socket.emit('update-vehicle-signal', { VID, value });
+
+                console.log('Signal update sent:', { VID, value });
+            }
+
+            // Event listener for number input to track changes
+            const numberInput = document.getElementById('number-input');
+            numberInput.addEventListener('input', function () {
+                const currentValue = numberInput.value;
+                document.getElementById('current-value').innerText = currentValue; // Update UI with new value
+                updateVehicleSignal(currentValue); // Send value to backend via socket
+            });
+        }, false);
+    </script>
+</body>
+
+</html>

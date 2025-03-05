@@ -30,5 +30,8 @@
       "cordova-plugin-battery-status": {},
       "cordova-plugin-vibration": {}
     }
+  },
+  "dependencies": {
+    "socket.io-client": "^4.8.1"
   }
 }
