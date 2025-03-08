@@ -19,11 +19,14 @@
             border-collapse: collapse;
         }
 
-        table, th, td {
+        table,
+        th,
+        td {
             border: 1px solid #ddd;
         }
 
-        th, td {
+        th,
+        td {
             padding: 8px;
             text-align: left;
         }
@@ -41,6 +44,10 @@
         .result-container {
             margin-top: 20px;
         }
+
+        #currentSignals b, p{
+            
+        }
     </style>
 </head>
 
@@ -50,59 +57,53 @@
 
     <!-- Number Input to Update API -->
     <h3>Update Vehicle Signal</h3>
-    <input type="number" id="number-input" value="0" min="0" max="100" step="1">
-    <div class="result-container">
-        <p>Current Value: <span id="current-value">0</span></p>
+    
+    <div id="currentSignals">
+
     </div>
-
+    
     <script>
-document.addEventListener("deviceready", function () {
-    const socket = io('https://backseatdriver-ie-api.onrender.com'); // Backend URL
+        document.addEventListener("deviceready", function () {
+            const socket = io('https://backseatdriver-ie-api.onrender.com'); // Backend URL
 
-    socket.on('connect', function () {
-        console.log('✅ Connected to Socket.IO server:', socket.id);
-    });
+            let VIN = localStorage.getItem("VID");
 
-    socket.on('connect_error', function (err) {
-        console.error('❌ Socket connection error:', err);
-    });
+            socket.on('connect', function () {
+                console.log('✅ Connected to Socket.IO server:', socket.id);
+            });
 
-    // Emit vehicle signal change to the backend via Socket.IO
-    function updateVehicleSignal(value) {
-        const VID = localStorage.getItem('VID'); // Get vehicle ID from localStorage
+            socket.on('connect_error', function (err) {
+                console.error('❌ Socket connection error:', err);
+            });
 
-        if (!VID) {
-            console.warn('⚠ No Vehicle ID found in localStorage');
-            return;
-        }
+            // Emit vehicle signal change to the backend via Socket.IO
+            function updateVehicleSignal(value) {
+                let obdData = {
+                    vin: VIN,  // Include the vehicle VIN
+                    engineRPM: Math.floor(Math.random() * 7000),
+                    vehicleSpeed: Math.floor(Math.random() * 200),
+                    fuelLevel: Math.floor(Math.random() * 100),
+                    throttlePosition: Math.floor(Math.random() * 100),
+                    massAirFlow: (Math.random() * 50).toFixed(2),
+                    intakeAirTemp: Math.floor(Math.random() * 50),
+                    coolantTemp: Math.floor(Math.random() * 120)
+                };
 
-        if (socket.connected) {
-            socket.emit('sendMessage', { VID, value });
-            console.log('📡 Signal update sent:', { VID, value });
-        } else {
-            console.warn('⚠ Socket is not connected. Cannot send signal.');
-        }
-    }
+                // send signal to output
+                document.getElementById('currentSignals').innerHTML = JSON.stringify(obdData);
 
-    // Event listener for number input to track changes
-    const numberInput = document.getElementById('number-input');
-    numberInput.addEventListener('input', function () {
-        const currentValue = numberInput.value;
-        document.getElementById('current-value').innerText = currentValue; // Update UI with new value
-        updateVehicleSignal(currentValue); // Send value to backend via socket
-    });
+                console.log("Sending OBD-II Data:", obdData);
+                socket.emit('obdData', obdData);
+            }
 
-    // Listen for live updates from the backend
-    socket.on('receiveMessage', function (data) {
-        console.log('📥 Received vehicle live data:', data);
-        document.getElementById('number-input').innerText = JSON.stringify(data); // Display on UI
-    });
+            // Send data every 2 seconds
+            setInterval(updateVehicleSignal, 2000);
 
-    socket.on('disconnect', function () {
-        console.log('Disconnected from server');
-    });
+            socket.on('disconnect', function () {
+                console.log('Disconnected from server');
+            });
 
-}, false);
+        }, false);
     </script>
 </body>
 
