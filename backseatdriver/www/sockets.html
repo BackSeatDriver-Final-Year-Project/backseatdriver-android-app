@@ -45,9 +45,8 @@
             margin-top: 20px;
         }
 
-        #currentSignals b, p{
-            
-        }
+        #currentSignals b,
+        p {}
     </style>
 </head>
 
@@ -57,11 +56,11 @@
 
     <!-- Number Input to Update API -->
     <h3>Update Vehicle Signal</h3>
-    
+
     <div id="currentSignals">
 
     </div>
-    
+
     <script>
         document.addEventListener("deviceready", function () {
             const socket = io('https://backseatdriver-ie-api.onrender.com'); // Backend URL
@@ -78,6 +77,13 @@
 
             // Emit vehicle signal change to the backend via Socket.IO
             function updateVehicleSignal(value) {
+                // Location Limitations
+                const minLat = 53.34; // Min latitude (Dublin area)
+                const maxLat = 53.36; // Max latitude
+                const minLon = -6.27; // Min longitude
+                const maxLon = -6.25; // Max longitude
+
+
                 let obdData = {
                     vin: VIN,  // Include the vehicle VIN
                     engineRPM: Math.floor(Math.random() * 7000),
@@ -86,7 +92,9 @@
                     throttlePosition: Math.floor(Math.random() * 100),
                     massAirFlow: (Math.random() * 50).toFixed(2),
                     intakeAirTemp: Math.floor(Math.random() * 50),
-                    coolantTemp: Math.floor(Math.random() * 120)
+                    coolantTemp: Math.floor(Math.random() * 120),
+                    latitude : Math.random() * (maxLat - minLat) + minLat,
+                    longitude : Math.random() * (maxLon - minLon) + minLon
                 };
 
                 // send signal to output
