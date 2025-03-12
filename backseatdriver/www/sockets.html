@@ -75,6 +75,8 @@
                 console.error('❌ Socket connection error:', err);
             });
 
+            journey_recording = [];
+
             // Emit vehicle signal change to the backend via Socket.IO
             function updateVehicleSignal(value) {
                 // Location Limitations
@@ -82,7 +84,9 @@
                 const maxLat = 53.36; // Max latitude
                 const minLon = -6.27; // Min longitude
                 const maxLon = -6.25; // Max longitude
-
+                
+                current_location = [Math.random() * (maxLat - minLat) + minLat,Math.random() * (maxLon - minLon) + minLon];
+                journey_recording.push(current_location);
 
                 let obdData = {
                     vin: VIN,  // Include the vehicle VIN
@@ -94,7 +98,8 @@
                     intakeAirTemp: Math.floor(Math.random() * 50),
                     coolantTemp: Math.floor(Math.random() * 120),
                     latitude : Math.random() * (maxLat - minLat) + minLat,
-                    longitude : Math.random() * (maxLon - minLon) + minLon
+                    longitude : Math.random() * (maxLon - minLon) + minLon,
+                    jounrey : journey_recording
                 };
 
                 // send signal to output
