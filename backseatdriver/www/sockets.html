@@ -76,6 +76,7 @@
             });
 
             journey_recording = [];
+            fuelUsage_recording = [];
 
             // Emit vehicle signal change to the backend via Socket.IO
             function updateVehicleSignal(value) {
@@ -88,6 +89,9 @@
                 current_location = [Math.random() * (maxLat - minLat) + minLat,Math.random() * (maxLon - minLon) + minLon];
                 journey_recording.push(current_location);
 
+                fuel_usage_point = { name: JSON.stringify(Date.now()), value: Math.floor(Math.random() * 100)};
+                fuelUsage_recording.push(fuel_usage_point);
+
                 let obdData = {
                     vin: VIN,  // Include the vehicle VIN
                     engineRPM: Math.floor(Math.random() * 7000),
@@ -99,7 +103,8 @@
                     coolantTemp: Math.floor(Math.random() * 120),
                     latitude : Math.random() * (maxLat - minLat) + minLat,
                     longitude : Math.random() * (maxLon - minLon) + minLon,
-                    jounrey : journey_recording
+                    jounrey : journey_recording,
+                    fuel_usage : fuelUsage_recording
                 };
 
                 // send signal to output
