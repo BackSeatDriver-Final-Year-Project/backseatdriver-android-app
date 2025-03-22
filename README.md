@@ -1,12 +1,12 @@
-<img src="https://github.com/caolanmaguire/calsickofthis/blob/main/Purple%20Sky%20Profile%20Header.png" alt="Image description" style="width: 100%;">
+<img src="https://github.com/caolanmaguire/calsickofthis/blob/main/Copy%20of%20Purple%20Sky%20Profile%20Header.png" alt="Image description" style="width: 100%;">
 <!-- <img src="https://github.com/caolanmaguire/emerging_technologies/blob/main/eliza/assets/profile.webp" alt="chatbot character" width="125"> -->
 
 
-# RIP - Ireland
+# Back Seat Driver - FYP
 
 | **Student**          | Caolán Maguire       |
 |----------------------|--------------------------|
-| **Title**   | "BACK SEAT DRIER" - TELEMATICS SOLUTION FOR BUSINESSES AND INDIVIDUALS               |
+| **Title**   | "BACK SEAT DRIER" - DATA DRIVEN DRIVING INFOMATICS               |
 | **Name**   | Caolán Maguire               |
 | **Student ID**   | G00385433               |
 | **Video Walkthrough**   |  |
