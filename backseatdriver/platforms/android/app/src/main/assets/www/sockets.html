@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>OBD2 Reader - Update Signal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimal-ui">
+    <script src="cordova.js"></script>
+    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        table {
+            width: 60%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid #ddd;
+        }
+
+        th,
+        td {
+            padding: 8px;
+            text-align: left;
+        }
+
+        h4 {
+            margin-top: 20px;
+        }
+
+        #number-input {
+            font-size: 20px;
+            padding: 10px;
+            margin-top: 20px;
+        }
+
+        .result-container {
+            margin-top: 20px;
+        }
+
+        #currentSignals b,
+        p {}
+    </style>
+</head>
+
+<body>
+    <h1>Back Seat Driver</h1>
+    <h4>Account: <b id="user_id"></b></h4>
+
+    <!-- Number Input to Update API -->
+    <h3>Update Vehicle Signal</h3>
+
+    <div id="currentSignals">
+
+    </div>
+
+    <script>
+        document.addEventListener("deviceready", function () {
+            const socket = io('https://backseatdriver-ie-api.onrender.com'); // Backend URL
+
+            let VIN = localStorage.getItem("VID");
+
+            socket.on('connect', function () {
+                console.log('✅ Connected to Socket.IO server:', socket.id);
+            });
+
+            socket.on('connect_error', function (err) {
+                console.error('❌ Socket connection error:', err);
+            });
+
+            journey_recording = [];
+            fuelUsage_recording = [];
+
+            // Emit vehicle signal change to the backend via Socket.IO
+            function updateVehicleSignal(value) {
+                // Location Limitations
+                const minLat = 53.34; // Min latitude (Dublin area)
+                const maxLat = 53.36; // Max latitude
+                const minLon = -6.27; // Min longitude
+                const maxLon = -6.25; // Max longitude
+                
+                current_location = [Math.random() * (maxLat - minLat) + minLat,Math.random() * (maxLon - minLon) + minLon];
+                journey_recording.push(current_location);
+
+                fuel_usage_point = { name: JSON.stringify(Date.now()), value: Math.floor(Math.random() * 100)};
+                fuelUsage_recording.push(fuel_usage_point);
+
+                let obdData = {
+                    vin: VIN,  // Include the vehicle VIN
+                    engineRPM: Math.floor(Math.random() * 7000),
+                    vehicleSpeed: Math.floor(Math.random() * 200),
+                    fuelLevel: Math.floor(Math.random() * 100),
+                    throttlePosition: Math.floor(Math.random() * 100),
+                    massAirFlow: (Math.random() * 50).toFixed(2),
+                    intakeAirTemp: Math.floor(Math.random() * 50),
+                    coolantTemp: Math.floor(Math.random() * 120),
+                    latitude : Math.random() * (maxLat - minLat) + minLat,
+                    longitude : Math.random() * (maxLon - minLon) + minLon,
+                    jounrey : journey_recording,
+                    fuel_usage : fuelUsage_recording
+                };
+
+                // send signal to output
+                document.getElementById('currentSignals').innerHTML = JSON.stringify(obdData);
+
+                console.log("Sending OBD-II Data:", obdData);
+                socket.emit('obdData', obdData);
+            }
+
+            // Send data every 2 seconds
+            setInterval(updateVehicleSignal, 2000);
+
+            socket.on('disconnect', function () {
+                console.log('Disconnected from server');
+            });
+
+        }, false);
+    </script>
+</body>
+
+</html>

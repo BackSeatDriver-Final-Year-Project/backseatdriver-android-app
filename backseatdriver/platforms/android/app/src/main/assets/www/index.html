@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/onsenui/css/onsenui.css">
+    <link rel="stylesheet" href="https://unpkg.com/onsenui/css/onsen-css-components.min.css">
+    <script src="https://unpkg.com/onsenui/js/onsenui.min.js"></script>
+    <script src="js/controls.js"></script>
+    <link rel="stylesheet" type="text/css" href="style/styles.css" />
+    <style>
+        ons-tab[active] {
+            box-shadow: 0 6px 5px -4px #c3d600 !important;
+        }
+
+        .text-input:invalid {
+            width: 92% !important;
+            margin-left: 15px !important;
+        }
+    </style>
+</head>
+
+<body>
+    <ons-navigator id="appNavigator" swipeable swipe-target-width="80px">
+        <ons-page>
+            <ons-splitter id="appSplitter">
+                <ons-splitter-side id="sidemenu" page="sidemenu.html" swipeable side="right" collapse=""
+                    width="260px"></ons-splitter-side>
+                <ons-splitter-content page="tabbar.html"></ons-splitter-content>
+            </ons-splitter>
+        </ons-page>
+    </ons-navigator>
+
+    <template id="tabbar.html">
+        <ons-page id="tabbar-page">
+            <ons-toolbar>
+                <div class="center">Login</div>
+                <div class="right">
+                    <ons-toolbar-button onclick="fn.toggleMenu()">
+                        <ons-icon icon="ion-ios-menu, material:md-menu"></ons-icon>
+                    </ons-toolbar-button>
+                </div>
+            </ons-toolbar>
+            <ons-tabbar swipeable id="appTabbar" position="auto">
+                <ons-tab label="login" icon="md-home" page="dashboard.html" active></ons-tab>
+            </ons-tabbar>
+
+            <script>
+                ons.getScriptPage().addEventListener('prechange', function (event) {
+                    if (event.target.matches('#appTabbar')) {
+                        event.currentTarget.querySelector('ons-toolbar .center').innerHTML = event.tabItem.getAttribute('label');
+                    }
+                });
+            </script>
+        </ons-page>
+    </template>
+
+    <template id="sidemenu.html">
+        <ons-page>
+            <p>side menu</p>
+        </ons-page>
+    </template>
+
+    <template id="dashboard.html">
+        <ons-page>
+            <br />
+            <span>
+                <!-- <form name="login-form">
+                    <div><input class="text-input text-input--material" placeholder="username" type="text" required>
+                    </div>
+                    <br />
+                    <div><input class="text-input text-input--material" placeholder="Password" type="password" required>
+                    </div>
+                    <br />
+                    <button class="button button--large--cta" style="width: 95%; margin: 0 auto;">Login</button>
+                </form> -->
+
+                <form id="loginForm">
+                    <label for="email">Email:</label>
+                    <input type="text" value="maguirecaolan" id="email" name="email" required>
+
+                    <label for="password">Password:</label>
+                    <input type="password" value="passwordcaolan" id="password" name="password" required>
+
+                    <button style="font-size:25px;" type="submit">Login</button>
+                </form>
+
+                <!-- <a style="font-size:30px;" href="index3.html">CLICK HERE</a>
+                <a style="font-size: large;" href="index4.html">GEO CLICK HERE</a> -->
+
+                <div class="message" id="message"></div>
+
+                <script>
+                    document.getElementById("loginForm").addEventListener("submit", async function (event) {
+                        event.preventDefault(); // Prevent the form from submitting normally
+
+                        const email = document.getElementById("email").value;
+                        const password = document.getElementById("password").value;
+
+                        try {
+                            const response = await fetch("https://backseatdriver-ie-api.onrender.com/login", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify({ "username": email, "password" : password })
+                            });
+
+                            if (response.ok) {
+                                const data = await response.json();
+                                // Process the response data (e.g., store the token or display a message)
+                                document.getElementById("message").innerText = "Login successful! Token: " + data.token;
+                                console.log("JWT Token:", data.token); // For debugging
+                                sessionStorage.setItem('logintoken', data.token);
+                                localStorage.setItem('logintoken', data.token);
+                                location.href = 'list-assets.html';
+                            } else {
+                                // Handle errors (e.g., incorrect login)
+                                const error = await response.json();
+                                document.getElementById("message").innerText = "Error: " + error.message;
+                            }
+                        } catch (error) {
+                            console.error("Request failed:", error);
+                            document.getElementById("message").innerText = "An error occurred. Please try again.";
+                        }
+                    });
+                </script>
+
+            </span>
+        </ons-page>
+    </template>
+
+    <!-- end of test -->
+
+
+
+
+</body>
+
+</html>
