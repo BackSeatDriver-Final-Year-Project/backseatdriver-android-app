@@ -45,8 +45,20 @@
             margin-top: 20px;
         }
 
-        #currentSignals b,
-        p {}
+        #currentSignals {
+            background-color: black;
+            color:white;
+            height: 300px;
+            width: 50%;
+            overflow: auto;
+        } 
+
+        input[type="number"] {
+            width: 40%;
+            padding: 10px;
+            margin: 5px;
+        }
+
     </style>
 </head>
 
@@ -57,13 +69,57 @@
     <!-- Number Input to Update API -->
     <h3>Update Vehicle Signal</h3>
 
+    <!-- vin: VIN,  // Include the vehicle VIN
+    engineRPM: Math.floor(Math.random() * 7000),
+    vehicleSpeed: Math.floor(Math.random() * 200),
+    fuelLevel: Math.floor(Math.random() * 100),
+    throttlePosition: Math.floor(Math.random() * 100),
+    massAirFlow: (Math.random() * 50).toFixed(2),
+    intakeAirTemp: Math.floor(Math.random() * 50),
+    coolantTemp: Math.floor(Math.random() * 120),
+    latitude : Math.random() * (maxLat - minLat) + minLat,
+    longitude : Math.random() * (maxLon - minLon) + minLon,
+    jounrey : journey_recording,
+    fuel_usage : fuelUsage_recording -->
+
+    <!-- <input type="number" disabled id="vinValue" placeholder="VIN"/> -->
+    <label>Engine RPM</label> <br/>
+    <input type="number" id="engineRPMValue" placeholder="Engine RPM" value="0"/>  <br/>
+    
+    <label>Vehicle Speed</label> <br/>
+    <input type="number" id="vehicleSpeedValue" placeholder="Vehicle Speed" value="0"/>  <br/>
+
+    <label>Fuel Level</label> <br/>
+    <input type="number" id="fuelLevelValue" placeholder="Fuel Level" value="100"/> <br/>
+
+    <label>Throttle Position</label> <br/>
+        <label>Throttle Position</label> 
+    <input type="number" id="throttlePositionValue" placeholder="Throttle Position" value="0"/> <br/>
+
+    <label>Mass Air Flow</label> <br/>
+    <input type="number" id="massAirFlowValue" placeholder="Mass Air Flow" value="0"/> <br/>
+
+    <label>Intake Air Temperature</label> <br/>
+    <input type="number" id="intakeAirTempValue" placeholder="Intake Air Temperature" value="0"/> <br/>
+
+    <label>Coolant Temperature</label> <br/>
+    <input type="number" id="coolantTemperatureValue" placeholder="Coolant Temperature" value="0"/> <br/>
+
+    <label>Latitude</label> <br/>
+    <input type="number" id="latitudeValue" placeholder="latitude" value="0"/> <br/>
+    
+    <label>longitude</label> <br/>
+    <input type="number" id="longitudeValue" placeholder="longitude" value="0"/> <br/>
+
+    <h4>Output Console</h4>
     <div id="currentSignals">
 
     </div>
 
     <script>
-        document.addEventListener("deviceready", function () {
-            const socket = io('https://backseatdriver-ie-api.onrender.com'); // Backend URL
+//        document.addEventListener("deviceready", function () {
+             const socket = io('https://backseatdriver-ie-api.onrender.com'); // Backend URL
+            // const socket = io('http://localhost:3000'); // Backend URL
 
             let VIN = localStorage.getItem("VID");
 
@@ -89,14 +145,14 @@
                 current_location = [Math.random() * (maxLat - minLat) + minLat,Math.random() * (maxLon - minLon) + minLon];
                 journey_recording.push(current_location);
 
-                fuel_usage_point = { name: JSON.stringify(Date.now()), value: Math.floor(Math.random() * 100)};
+                fuel_usage_point = { name: JSON.stringify(Date.now()), value: document.getElementById('fuelLevelValue').value};
                 fuelUsage_recording.push(fuel_usage_point);
 
                 let obdData = {
                     vin: VIN,  // Include the vehicle VIN
-                    engineRPM: Math.floor(Math.random() * 7000),
-                    vehicleSpeed: Math.floor(Math.random() * 200),
-                    fuelLevel: Math.floor(Math.random() * 100),
+                    engineRPM: document.getElementById('engineRPMValue').value, //Math.floor(Math.random() * 7000),
+                    vehicleSpeed: document.getElementById('vehicleSpeedValue').value,  //Math.floor(Math.random() * 200),
+                    fuelLevel: document.getElementById('fuelLevelValue').value, //Math.floor(Math.random() * 100),
                     throttlePosition: Math.floor(Math.random() * 100),
                     massAirFlow: (Math.random() * 50).toFixed(2),
                     intakeAirTemp: Math.floor(Math.random() * 50),
@@ -121,7 +177,7 @@
                 console.log('Disconnected from server');
             });
 
-        }, false);
+        //}, false);
     </script>
 </body>
 
