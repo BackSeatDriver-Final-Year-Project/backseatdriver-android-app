@@ -1,4 +1,4 @@
-<img src="https://github.com/caolanmaguire/calsickofthis/blob/main/Copy%20of%20Purple%20Sky%20Profile%20Header.png" alt="Image description" style="width: 100%;">
+<img src="https://github.com/caolanmaguire/calsickofthis/blob/main/Copy%20of%20Purple%20Sky%20Profile%20Header%20(1).png" alt="Image description" style="width: 100%;">
 <!-- <img src="https://github.com/caolanmaguire/emerging_technologies/blob/main/eliza/assets/profile.webp" alt="chatbot character" width="125"> -->
 
 
