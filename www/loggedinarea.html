@@ -6,9 +6,16 @@
     <link rel="stylesheet" href="https://unpkg.com/onsenui/css/onsenui.css">
     <link rel="stylesheet" href="https://unpkg.com/onsenui/css/onsen-css-components.min.css">
     <script src="https://unpkg.com/onsenui/js/onsenui.min.js"></script>
-    <script src="js/controls.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="cordova.js"></script>
+    <!-- <script src="js/controls.js"></script> -->
     <link rel="stylesheet" type="text/css" href="style/styles.css" />
     <style>
+        #map {
+            min-height: 200px;
+        }
+        
         ons-tab[active] {
             box-shadow: 0 6px 5px -4px #c3d600 !important;
         }
@@ -29,7 +36,7 @@
     <template id="tabbar.html">
         <ons-page id="tabbar-page">
             <ons-toolbar>
-                <div class="center">Make a quote</div>
+                <div class="center">Back Seat Driver</div>
                 <div class="right">
                     <ons-toolbar-button onclick="fn.toggleMenu()">
                         <ons-icon icon="ion-ios-menu, material:md-menu"></ons-icon>
@@ -61,45 +68,115 @@
 
     <template id="dashboard.html">
         <ons-page>
+            <br />
+
+            <button id="connect" class="button button--large--cta" style="width: 95%; margin: 0 auto;"
+                onclick="connect_btn()">+ Connect to a
+                bluetooth
+                module</button>
+            <br />
+            <!-- <button disabled class="button button--large--cta" style="width: 95%; margin: 0 auto; background-color: green;">Start Journey</button>
             <br/>
-            <button class="button button--large--cta" style="width: 95%; margin: 0 auto;">+ Connect to a bluetooth module</button>
-            <br/>
-            <button disabled class="button button--large--cta" style="width: 95%; margin: 0 auto; background-color: green;">Start Journey</button>
-            <br/>
-            <button disabled class="button button--large--cta" style="width: 95%; margin: 0 auto; background-color: red;">End Journey</button>
-            
-            <br/>
-            <b style="color: green;">Connected to: OBD Bluetooth Dongle</b> <br/>
+            <button disabled class="button button--large--cta" style="width: 95%; margin: 0 auto; background-color: red;">End Journey</button> -->
+
+            <br />
+            <p id="status">Not connected</p>
+            <b style="color: green;">Connected to: OBD Bluetooth Dongle</b> <br />
             <b style="color: green;">Vehicle: Connected</b>
-            <br/>
+            <br />
 
-            <br/>
-                <a href="login.html">login page</a>
-            <br/>
-            
-            <label>Analysis</label><hr/>
+            <br />
+            <!-- <a href="login.html">login page</a> -->
+            <br />
+
+            <div id="map"></div>
+
+            <script>
+                let map = L.map('map').setView([53.349805, -6.26031], 14); // Default location: Dublin
+                let markers = [];
+
+                // Add OpenStreetMap Tile Layer
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap contributors'
+                }).addTo(map);
+
+                let prevLat = null, prevLon = null; // Store previous coordinates
+
+                function toRadians(degrees) {
+                    return degrees * (Math.PI / 180);
+                }
+
+                function haversineDistance(lat1, lon1, lat2, lon2) {
+                    const R = 6371000; // Radius of Earth in meters
+                    const dLat = toRadians(lat2 - lat1);
+                    const dLon = toRadians(lon2 - lon1);
+
+                    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                        Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
+                        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+                    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                    return R * c; // Distance in meters
+                }
+
+                function isWithin300Meters(prevLat, prevLon, newLat, newLon) {
+                    if (prevLat === null || prevLon === null) return false; // First point is always allowed
+                    return haversineDistance(prevLat, prevLon, newLat, newLon) <= 300;
+                }
+
+                function addMarker(lat, lon) {
+                    let marker = L.marker([lat, lon]).addTo(map)
+                        .bindPopup(`📍 Location: ${lat.toFixed(5)}, ${lon.toFixed(5)}`)
+                        .openPopup();
+                    markers.push(marker);
+                }
+
+                function checkLocation() {
+                    navigator.geolocation.getCurrentPosition(position => {
+                        let newLat = position.coords.latitude;
+                        let newLon = position.coords.longitude;
+
+                        // Check if new point is at least 300m away
+                        if (!isWithin300Meters(prevLat, prevLon, newLat, newLon)) {
+                            addMarker(newLat, newLon);
+                            prevLat = newLat;
+                            prevLon = newLon;
+                        }
+                    }, error => {
+                        console.error("Error getting location: ", error.message);
+                    }, {
+                        enableHighAccuracy: true
+                    });
+                }
+
+                // Check location every 10 seconds (adjust as needed)
+                setInterval(checkLocation, 10000); 
+            </script>
+
+            <label>LIVE STREAM </label>
+            <hr />
 
             <div id="tile">
-                <p>23</p> <small>mph</small>
-                <b>Vehicle Speed</b>
+                <p id="speed">0</p> <small>mph</small>
+                <!-- <b>Vehicle Speed</b> -->
             </div>
 
             <div id="tile">
-                <p>23</p>  <small>rpm</small>
-                <b>Engine RPM</b>
+                <p id="rpm">0</p> <small>rpm</small>
+                <!-- <b>Engine RPM</b> -->
             </div>
 
             <div id="tile">
-                <p>23</p>  <small>degree</small>
+                <p>0</p> <small>degree</small>
                 <b>Engine coolant</b>
             </div>
 
             <div id="tile">
-                <p>23</p>  <small>degrees</small>
+                <p>0</p> <small>degrees</small>
                 <b>Intake Air</b>
             </div>
-            
-        
+
+
         </ons-page>
     </template>
 
@@ -110,21 +187,23 @@
 
     <template id="settings.html">
         <ons-page>
-            <br/><br/><br/>
-            <input type="search" value="" placeholder="Search" class="search-input search-input--material" style="width: 95%; margin: 0 auto; margin-left:10px;"> <br/><br/>
-            
+            <br /><br /><br />
+            <input type="search" value="" placeholder="Search" class="search-input search-input--material"
+                style="width: 95%; margin: 0 auto; margin-left:10px;"> <br /><br />
+
             <p>Vehicles connected to this account</p>
             <ul class="list list--inset">
                 <!-- <li>My Vehicles</li> -->
                 <li class="list-item list--inset__item list-item--chevron list-item--tappable">
-                  <div class="list-item__center">List Item with Chevron</div>
+                    <div class="list-item__center">List Item with Chevron</div>
                 </li>
                 <li class="list-item list--inset__item list-item--chevron list-item--tappable">
-                  <div class="list-item__center">List Item with Chevron</div>
+                    <div class="list-item__center">List Item with Chevron</div>
                 </li>
-              </ul>
-            <br/>
-            <button class="button button--large--cta" style="width: 95%; margin: 0 auto; background-color: red;">Log out</button>
+            </ul>
+            <br />
+            <button class="button button--large--cta" style="width: 95%; margin: 0 auto; background-color: red;">Log
+                out</button>
         </ons-page>
     </template>
 
@@ -249,49 +328,6 @@
                                 break;
                         }
                     });
-                    //     var getRandomName = function() {
-                    //         const names = ['Oscar', 'Max', 'Tiger', 'Sam', 'Misty', 'Simba', 'Coco', 'Chloe', 'Lucy', 'Missy'];
-                    //         return names[Math.floor(Math.random() * names.length)];
-                    //     };
-                    //     var getRandomUrl = function() {
-                    //         const width = 40 + Math.floor(20 * Math.random());
-                    //         const height = 40 + Math.floor(20 * Math.random());
-                    //         return `https://placekitten.com/g/${width}/${height}`;
-                    //     };
-                    //     var getRandomKitten = function() {
-                    //         return {
-                    //             name: getRandomName(),
-                    //             url: getRandomUrl()
-                    //         };
-                    //     };
-                    //     var getRandomData = function() {
-                    //         const data = [];
-                    //         for (var i = 0; i < 8; i++) {
-                    //             data.push(getRandomKitten());
-                    //         }
-                    //         return data;
-                    //     };
-                    //     var createKitten = function(kitten) {
-                    //         return ons.createElement(`
-                    //     <ons-list-item>
-                    //       <div class="left">
-                    //         <img class="list-item__thumbnail" src="${kitten.url}">
-                    //       </div>
-                    //       <div class="center">${kitten.name}</div>
-                    //     </ons-list-item>
-                    //   `);
-                    //     };
-                    //     var kittens = getRandomData();
-                    //     for (kitty of kittens) {
-                    //         var kitten = createKitten(kitty);
-                    //         document.getElementById('kitten-list').appendChild(kitten);
-                    //     };
-                    //     pullHook.onAction = function(done) {
-                    //         setTimeout(function() {
-                    //             document.getElementById('kitten-list').appendChild(createKitten(getRandomKitten()));
-                    //             done();
-                    //         }, 400);
-                    //     }
                 };
             </script>
 
@@ -529,8 +565,86 @@
         </ons-page>
     </template>
 
+    <script>
+        // document.addEventListener('deviceready', function () {
+        let isConnected = false;
 
+        function connect(deviceId) {
+            bluetoothSerial.connect(deviceId, () => {
+                isConnected = true;
+                document.getElementById('status').textContent = 'Connected';
+            }, () => {
+                isConnected = false;
+                document.getElementById('status').textContent = 'Connection failed';
+            });
+        }
 
+        function sendPID(pid) {
+            return new Promise((resolve) => {
+                bluetoothSerial.write(pid + '\r', () => {
+                    setTimeout(() => {
+                        bluetoothSerial.read(data => resolve(data));
+                    }, 200); // Give time for response
+                });
+            });
+        }
+
+        function parseResponse(pid, data) {
+            console.log(data);
+            // const lines = data.split('>');
+            // console.log(lines);
+
+            const lines = data.split('\r').map(line => line.trim()).filter(line => line && !line.startsWith('01'));
+            const parts = lines.join(' ').split(/\s+/);
+
+            console.log(lines);
+            // return 0
+            for (let line of lines) {
+                console.log(line);
+                if (!line.includes('41')) continue;
+
+                const parts = line.trim().split(/\s+/);
+                if (parts[0] !== '41' || parts.length < 3) continue;
+
+                const mode = parts[1];
+                const A = parseInt(parts[2], 16);
+                const B = parts[3] ? parseInt(parts[3], 16) : 0;
+
+                if (mode === '0C' && pid === '010C') return ((A * 256 + B) / 4).toFixed(0); // RPM
+                if (mode === '0D' && pid === '010D') return A; // Speed
+            }
+            return 'N/A';
+        }
+
+        async function update() {
+            if (!isConnected) return;
+
+            const rpmData = await sendPID('010C');
+            const speedData = await sendPID('010D');
+
+            const rpm = parseResponse('010C', rpmData);
+            const speed = parseResponse('010D', speedData);
+
+            document.getElementById('rpm').textContent = rpm;
+            document.getElementById('speed').textContent = speed;
+        }
+
+        // document.getElementById('connect').onclick = () => {
+        //     alert('hello world');
+        //     bluetoothSerial.list(devices => {
+        //         if (devices.length > 0) connect(devices[0].id);
+        //     });
+        // };
+
+        function connect_btn() {
+            bluetoothSerial.list(devices => {
+                if (devices.length > 0) connect(devices[0].id);
+            });
+        }
+
+        setInterval(update, 1500);
+        // });
+    </script>
 </body>
 
 </html>

@@ -3,8 +3,9 @@
     padding: 10px;
     float: left;
     margin: 5%;
-    width: 30%;
-    min-height: 50px;
+    width: 40%;
+    min-height: 129px;
+    box-shadow: 0 .125rem .25rem rgba(0,0,0,.075)!important;
 }
 
 #tile p{

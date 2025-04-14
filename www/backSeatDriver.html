@@ -1,160 +1,87 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-    <title>OBD2 Reader - Live Signals</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimal-ui">
-    <script src="cordova.js"></script>
-    <script>
-        caolan = {};
+  <title>OBD2 Reader</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="cordova.js"></script>
+  <script>
+    document.addEventListener('deviceready', function () {
+      let isConnected = false;
 
-        document.addEventListener('deviceready', function () {
-            const outputDiv = document.getElementById('output');
-            let isFetching = false;
-            let isConnected = false;
-
-            function appendOutput(message) {
-                const messageDiv = document.createElement('div');
-                messageDiv.textContent = message;
-                outputDiv.appendChild(messageDiv);
-            }
-
-            function listBluetoothDevices() {
-                bluetoothSerial.list(
-                    (devices) => {
-                        appendOutput('Devices found:');
-                        devices.forEach((device) => {
-                            appendOutput(`- ${device.name} (${device.id})`);
-                        });
-                    },
-                    (error) => {
-                        appendOutput('Error listing devices: ' + error);
-                    }
-                );
-            }
-
-            function connectToDevice(deviceId) {
-                bluetoothSerial.connect(deviceId,
-                    () => {
-                        appendOutput(`Connected to ${deviceId}`);
-                        document.getElementById('connectLabel').innerHTML = 'Connected to ' + deviceId;
-                        isConnected = true;
-                    },
-                    (error) => {
-                        appendOutput('Error connecting to device: ' + error);
-                        document.getElementById('connectLabel').innerHTML = 'Not connected';
-                        isConnected = false;
-                    }
-                );
-            }
-
-            function getOBDSignal(pid, callback) {
-                isFetching = true;
-                bluetoothSerial.write(pid + '\r', () => {
-                    bluetoothSerial.read((data) => {
-                        const response = parseOBDResponse(pid, data);
-                        caolan[pid] = response;
-                        isFetching = false;
-                        callback(pid, data);
-                    }, (error) => {
-                        appendOutput('Error reading response: ' + error);
-                        isFetching = false;
-                    });
-                }, (error) => {
-                    appendOutput('Error sending PID command: ' + error);
-                    isFetching = false;
-                });
-            }
-
-            function parseOBDResponse(pid, data) {
-                const parts = data.split(' ');
-                if (parts.length < 3) return "Invalid Data";
-
-                switch (pid) {
-                    case '010C': return parts; // return (parseInt(parts[2], 16) * 256 + parseInt(parts[3], 16)) / 4;
-                    case '010D': return parts; // return parseInt(parts[2], 16);
-                    case '0111': return parts; // return (parseInt(parts[2], 16) * 100) / 255;
-                    case '012F': return parts; // return (parseInt(parts[2], 16) * 100) / 255;
-                    case '0110': return parts; // return ((parseInt(parts[2], 16) * 256) + parseInt(parts[3], 16)) / 100;
-                    case '010F': case '0105': return parseInt(parts[2], 16) - 40;
-                    case '0902': return parts; // return parts.slice(2).map(byte => String.fromCharCode(parseInt(byte, 16))).join('');
-                    default: return parseInt(parts[2], 16);
-                }
-            }
-
-            // function updateSignal(signalDisplay, pid, signalName) {
-            //     getOBDSignal(pid, (receivedPid, value) => {
-            //         if (receivedPid === pid && value !== 'N/A') {
-            //             document.querySelectorAll('.listed-item').forEach(el => el.style.backgroundColor = 'white');
-            //             signalDisplay.style.background = 'lightgray';
-            //             signalDisplay.innerHTML = `${signalName}: ${value}`;
-            //         }
-            //     });
-            // }
-
-            const signals = [
-                ['rpmDisplay', '010C', 'Engine RPM'],
-                ['VehSpeedDisplay', '010D', 'Vehicle Speed'],
-                ['FuelLevelDisplay', '012F', 'Fuel Level'],
-                ['throttleposDisplay', '0111', 'Throttle Position'],
-                ['MassAirFlowDisplay', '0110', 'Mass Air Flow'],
-                ['IntakeAirTempDisplay', '010F', 'Intake Air Temp'],
-                ['CoolantTempDisplay', '0105', 'Coolant Temperature'],
-                ['VehicleVIN', '0902', 'Vehicle Identification Number (VIN)']
-            ];
-
-            let icounter = 0;
-            setInterval(() => {
-                if (isConnected) {
-                    const currentData = signals[icounter];
-                    // updateSignal(document.getElementById(currentData[0]), currentData[1], currentData[2]);
-
-                    function updateSignal(signalDisplay, pid, signalName) {
-                        getOBDSignal(pid, (receivedPid, value) => {
-                            if (receivedPid === pid && value !== 'N/A') {
-                                document.querySelectorAll('.listed-item').forEach(el => el.style.backgroundColor = 'white');
-                                signalDisplay.style.background = 'lightgray';
-                                signalDisplay.innerHTML = `${signalName}: ${value}`;
-                            }
-                        });
-                    }
-                }
-                icounter = (icounter + 1) % signals.length;
-            }, 6000);
-
-            document.getElementById('connectButton').onclick = function () {
-                bluetoothSerial.list((devices) => {
-                    if (devices.length > 0) {
-                        connectToDevice(devices[0].id);
-                    } else {
-                        appendOutput('No devices found.');
-                    }
-                }, (error) => {
-                    appendOutput('Error listing devices: ' + error);
-                });
-            };
-
-            listBluetoothDevices();
+      function connect(deviceId) {
+        bluetoothSerial.connect(deviceId, () => {
+          isConnected = true;
+          document.getElementById('status').textContent = 'Connected';
+        }, () => {
+          isConnected = false;
+          document.getElementById('status').textContent = 'Connection failed';
         });
-    </script>
+      }
+
+      function sendPID(pid) {
+        return new Promise((resolve) => {
+          bluetoothSerial.write(pid + '\r', () => {
+            setTimeout(() => {
+              bluetoothSerial.read(data => resolve(data));
+            }, 200); // Give time for response
+          });
+        });
+      }
+
+      function parseResponse(pid, data) {
+        console.log(data);
+        // const lines = data.split('>');
+        // console.log(lines);
+
+        const lines = data.split('\r').map(line => line.trim()).filter(line => line && !line.startsWith('01'));
+        const parts = lines.join(' ').split(/\s+/);
+
+        console.log(lines);
+        // return 0
+        for (let line of lines) {
+            console.log(line);
+          if (!line.includes('41')) continue;
+
+          const parts = line.trim().split(/\s+/);
+          if (parts[0] !== '41' || parts.length < 3) continue;
+
+          const mode = parts[1];
+          const A = parseInt(parts[2], 16);
+          const B = parts[3] ? parseInt(parts[3], 16) : 0;
+
+          if (mode === '0C' && pid === '010C') return ((A * 256 + B) / 4).toFixed(0); // RPM
+          if (mode === '0D' && pid === '010D') return A; // Speed
+        }
+        return 'N/A';
+      }
+
+      async function update() {
+        if (!isConnected) return;
+
+        const rpmData = await sendPID('010C');
+        const speedData = await sendPID('010D');
+
+        const rpm = parseResponse('010C', rpmData);
+        const speed = parseResponse('010D', speedData);
+
+        document.getElementById('rpm').textContent = 'RPM: ' + rpm;
+        document.getElementById('speed').textContent = 'Speed: ' + speed;
+      }
+
+      document.getElementById('connect').onclick = () => {
+        bluetoothSerial.list(devices => {
+          if (devices.length > 0) connect(devices[0].id);
+        });
+      };
+
+      setInterval(update, 1500);
+    });
+  </script>
 </head>
-
 <body>
-    <h1>Back Seat Driver - Live OBD Signals</h1>
-    <hr>
-    <label id="connectLabel">Not connected</label>
-    <button id="connectButton">Connect to OBD2 Device</button>
-    <hr>
-    <h4 class="listed-item" id="rpmDisplay">Engine RPM: N/A</h4>
-    <h4 class="listed-item" id="VehSpeedDisplay">Vehicle Speed: N/A</h4>
-    <h4 class="listed-item" id="FuelLevelDisplay">Fuel Level: N/A</h4>
-    <h4 class="listed-item" id="throttleposDisplay">Throttle Position: N/A</h4>
-    <h4 class="listed-item" id="MassAirFlowDisplay">Mass Air Flow: N/A</h4>
-    <h4 class="listed-item" id="IntakeAirTempDisplay">Intake Air Temp: N/A</h4>
-    <h4 class="listed-item" id="CoolantTempDisplay">Coolant Temperature: N/A</h4>
-    <h4 class="listed-item" id="VehicleVIN">Vehicle Identification Number (VIN): N/A</h4>
-    <p id="caloutput"></p>
-    <div id="output"></div>
+  <button id="connect">Connect</button>
+  <p id="status">Not connected</p>
+  <p id="rpm">RPM: N/A</p>
+  <p id="speed">Speed: N/A</p>
 </body>
-
 </html>
