@@ -28,7 +28,8 @@ textarea, input[type="button"], input[type="submit"], .input-checkbox, select {
 }
 
 .toolbar {
-    background-color: rgb(111, 66, 193);
+    background: linear-gradient(to bottom, #2d0b4a, #4a1c6f);
+    /* background-color: rgb(111, 66, 193); */
     /* background-color: #3d3d3d; */
     color: white, impo !important;
 }
@@ -59,7 +60,8 @@ select {
 }
 
 .tabbar {
-    background-color: rgb(111, 66, 193);
+    background:linear-gradient(to bottom, #2d0b4a, #4a1c6f);
+     /* rgb(111, 66, 193); */
     /* background-color: #3d3d3d; */
 }
 

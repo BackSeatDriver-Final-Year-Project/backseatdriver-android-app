@@ -9,13 +9,14 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="cordova.js"></script>
+    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
     <!-- <script src="js/controls.js"></script> -->
     <link rel="stylesheet" type="text/css" href="style/styles.css" />
     <style>
         #map {
             min-height: 200px;
         }
-        
+
         ons-tab[active] {
             box-shadow: 0 6px 5px -4px #c3d600 !important;
         }
@@ -75,108 +76,250 @@
                 bluetooth
                 module</button>
             <br />
-            <!-- <button disabled class="button button--large--cta" style="width: 95%; margin: 0 auto; background-color: green;">Start Journey</button>
-            <br/>
-            <button disabled class="button button--large--cta" style="width: 95%; margin: 0 auto; background-color: red;">End Journey</button> -->
 
-            <br />
             <p id="status">Not connected</p>
-            <b style="color: green;">Connected to: OBD Bluetooth Dongle</b> <br />
-            <b style="color: green;">Vehicle: Connected</b>
-            <br />
 
-            <br />
-            <!-- <a href="login.html">login page</a> -->
-            <br />
+            <div id="control-area" style="opacity: 0.5;">
 
-            <div id="map"></div>
 
-            <script>
-                let map = L.map('map').setView([53.349805, -6.26031], 14); // Default location: Dublin
-                let markers = [];
+                <label>X Axis</label><b id="acc_labl_x">0</b><br />
+                <label>Y Axis</label><b id="acc_labl_y">0</b><br />
+                <label>Z Axis</label><b id="acc_labl_z">0</b>
 
-                // Add OpenStreetMap Tile Layer
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; OpenStreetMap contributors'
-                }).addTo(map);
 
-                let prevLat = null, prevLon = null; // Store previous coordinates
+                <br />
 
-                function toRadians(degrees) {
-                    return degrees * (Math.PI / 180);
-                }
+                <div id="map"></div>
 
-                function haversineDistance(lat1, lon1, lat2, lon2) {
-                    const R = 6371000; // Radius of Earth in meters
-                    const dLat = toRadians(lat2 - lat1);
-                    const dLon = toRadians(lon2 - lon1);
+                <script>
 
-                    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                        Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
-                        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+                    // counter for distance travelled
+                    let distance_travelled_counter = 0;
 
-                    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-                    return R * c; // Distance in meters
-                }
+                    let speedometer_hourmeter = {
+                        'idle': 0,
+                        "1,10": 0,
+                        "11,20": 0,
+                        "21,40": 0,
+                        "41,60": 0,
+                        "61,80": 0,
+                        "81,100": 0,
+                        "101,120": 0,
+                        "121,1000": 0
 
-                function isWithin300Meters(prevLat, prevLon, newLat, newLon) {
-                    if (prevLat === null || prevLon === null) return false; // First point is always allowed
-                    return haversineDistance(prevLat, prevLon, newLat, newLon) <= 300;
-                }
+                    }
 
-                function addMarker(lat, lon) {
-                    let marker = L.marker([lat, lon]).addTo(map)
-                        .bindPopup(`📍 Location: ${lat.toFixed(5)}, ${lon.toFixed(5)}`)
-                        .openPopup();
-                    markers.push(marker);
-                }
 
-                function checkLocation() {
-                    navigator.geolocation.getCurrentPosition(position => {
-                        let newLat = position.coords.latitude;
-                        let newLon = position.coords.longitude;
+                    function speed_counter() {
 
-                        // Check if new point is at least 300m away
-                        if (!isWithin300Meters(prevLat, prevLon, newLat, newLon)) {
-                            addMarker(newLat, newLon);
-                            prevLat = newLat;
-                            prevLon = newLon;
+                        if (isConnected) {
+                            let current_speed = Number(document.getElementById('speed').innerHTML);
+
+                            // Caclulate distance travlled this last second
+                            if (!Number.isNaN(current_speed)) {
+                                distance_travelled_counter += current_speed / 3600;
+                            }
+
+                            document.getElementById('distance_travlled_id').innerHTML = distance_travelled_counter.toFixed(2);
+
+                            if (current_speed == 0) {
+                                speedometer_hourmeter['idle'] = speedometer_hourmeter['idle'] + 1;
+                                return;
+                            }
+
+                            keys = Object.keys(speedometer_hourmeter);
+                            for (let i = 0; i < keys.length; i++) {
+                                console.log(keys[i]);
+                                min = Number(keys[i].split(',')[0]);
+                                max = Number(keys[i].split(',')[1]);
+
+                                if (current_speed >= min && current_speed <= max) {
+                                    speedometer_hourmeter[keys[i]] = speedometer_hourmeter[keys[i]] + 1;
+                                }
+                            }
+
                         }
-                    }, error => {
-                        console.error("Error getting location: ", error.message);
-                    }, {
-                        enableHighAccuracy: true
+                    }
+
+                    // Run this every second
+                    setInterval(speed_counter, 1000);
+
+                    let currentLocation = [];
+
+                    function getCurrentLocation() {
+                        navigator.geolocation.getCurrentPosition(function (position) {
+                            currentLocation = [
+                                position.coords.latitude,
+                                position.coords.longitude
+                            ];
+                            console.log("Current Location Array:", currentLocation);
+                            // Now you can use 
+                            //  as needed
+                        }, function (error) {
+                            console.error("Geolocation error:", error.message);
+                        }, {
+                            enableHighAccuracy: true,
+                            timeout: 5000,
+                            maximumAge: 0
+                        });
+                    }
+
+                    getCurrentLocation();
+
+                    // Check location every 10 seconds (adjust as needed)
+                    // setInterval(getCurrentLocation, 10000);
+
+
+                    const socket = io('https://backseatdriver-ie-api.onrender.com'); // Backend URL
+                    let VIN = localStorage.getItem("VID");
+
+                    socket.on('connect', function () {
+                        console.log('✅ Connected to Socket.IO server:', socket.id);
                     });
-                }
 
-                // Check location every 10 seconds (adjust as needed)
-                setInterval(checkLocation, 10000); 
-            </script>
+                    socket.on('connect_error', function (err) {
+                        console.log('❌ Socket connection error:', err);
+                    });
 
-            <label>LIVE STREAM </label>
-            <hr />
+                    let journey_recording = [];
+                    let fuelUsage_recording = [];
 
-            <div id="tile">
-                <p id="speed">0</p> <small>mph</small>
-                <!-- <b>Vehicle Speed</b> -->
+
+                    // Emit vehicle signal change to the backend via Socket.IO
+                    function updateVehicleSignal(value) {
+
+                        if(!isConnected) return;
+
+                        // Location Limitations
+                        const minLat = 53.34; // Min latitude (Dublin area)
+                        const maxLat = 53.36; // Max latitude
+                        const minLon = -6.27; // Min longitude
+                        const maxLon = -6.25; // Max longitude
+
+
+
+                        getCurrentLocation();//[Math.random() * (maxLat - minLat) + minLat, Math.random() * (maxLon - minLon) + minLon];
+                        journey_recording.push(currentLocation);
+
+                        fuel_usage_point = { name: JSON.stringify(Date.now()), value: parseFloat(document.getElementById('fuel').innerHTML) };
+                        fuelUsage_recording.push(fuel_usage_point);
+
+
+                        let obdData = {
+                            vin: VIN,  // Include the vehicle VIN
+                            engineRPM: document.getElementById('rpm').innerHTML, //Math.floor(Math.random() * 7000),
+                            vehicleSpeed: document.getElementById('speed').innerHTML,  //Math.floor(Math.random() * 200),
+                            fuelLevel: document.getElementById('fuel').innerHTML, //Math.floor(Math.random() * 100),
+                            // throttlePosition: Math.floor(Math.random() * 100),
+                            // massAirFlow: (Math.random() * 50).toFixed(2),
+                            // intakeAirTemp: Math.floor(Math.random() * 50),
+                            // coolantTemp: Math.floor(Math.random() * 120),
+                            // latitude: current_location[0],//Math.random() * (maxLat - minLat) + minLat,
+                            // longitude: current_location[1],//Math.random() * (maxLon - minLon) + minLon,
+                            jounrey: journey_recording,
+                            speed_clock: [
+                                ["Speed", "seconds counter"],
+                                ["idle time (not moving)", speedometer_hourmeter["idle"]],
+                                ["1-10kmph", speedometer_hourmeter["1,10"]],
+                                ["11-20kmph", speedometer_hourmeter["11,20"]],
+                                ["21-50kmph", speedometer_hourmeter["21,40"]],
+                                ["41-60kmph", speedometer_hourmeter["41,60"]],
+                                ["61-80kmph", speedometer_hourmeter["61,80"]],
+                                ["81-100kmph", speedometer_hourmeter["81,100"]],
+                                ["101-120kmph", speedometer_hourmeter["101,120"]],
+                                ["121-1000kmph", speedometer_hourmeter["121,1000"]],
+                                // optionally add ["81+kmph", original["81,100"] + original["101,120"] + original["121,1000"]],
+                            ],
+                            fuel_usage: fuelUsage_recording,
+                            distance_travelled: distance_travelled_counter,
+                            crash_reports : moderate_crash_reports_log,
+                            severe_crash_reports : severe_crash_reports_log
+                        };
+                        console.log(obdData);
+
+                        // send signal to output
+                        // document.getElementById('currentSignals').innerHTML = JSON.stringify(obdData);
+                        console.log("Sending OBD-II Data:", obdData);
+                        socket.emit('obdData', obdData);
+                    }
+
+
+                    // Send data every 2 seconds
+                    setInterval(updateVehicleSignal, 5000);
+
+                    socket.on('disconnect', function () {
+                        console.log('Disconnected from server');
+                    });
+
+
+
+                    let map = L.map('map').setView([53.349805, -6.26031], 14); // Default location: Dublin
+                    let markers = [];
+
+                    // Add OpenStreetMap Tile Layer
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; OpenStreetMap contributors'
+                    }).addTo(map);
+
+                    let prevLat = null, prevLon = null; // Store previous coordinates
+
+                    function toRadians(degrees) {
+                        return degrees * (Math.PI / 180);
+                    }
+
+                    function haversineDistance(lat1, lon1, lat2, lon2) {
+                        const R = 6371000; // Radius of Earth in meters
+                        const dLat = toRadians(lat2 - lat1);
+                        const dLon = toRadians(lon2 - lon1);
+
+                        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                            Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
+                            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+                        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                        return R * c; // Distance in meters
+                    }
+
+                    function isWithin300Meters(prevLat, prevLon, newLat, newLon) {
+                        if (prevLat === null || prevLon === null) return false; // First point is always allowed
+                        return haversineDistance(prevLat, prevLon, newLat, newLon) <= 300;
+                    }
+
+                    function addMarker(lat, lon) {
+                        let marker = L.marker([lat, lon]).addTo(map)
+                            .bindPopup(`📍 Location: ${lat.toFixed(5)}, ${lon.toFixed(5)}`)
+                            .openPopup();
+                        markers.push(marker);
+                    }
+
+                </script>
+
+                <label>LIVE STREAM </label>
+                <hr />
+
+                <div id="tile">
+                    <p id="speed">0</p> <small>mph</small><br />
+                    <b>Vehicle Speed</b>
+                </div>
+
+                <div id="tile">
+                    <p id="rpm">0</p> <small>rpm</small><br />
+                    <b>Engine RPM</b>
+                </div>
+
+                <div id="tile">
+                    <p id="fuel">0</p> <small>%</small><br />
+                    <b>Fuel Level</b>
+                </div>
+
+                <div id="tile">
+                    <p id="distance_travlled_id">0</p> <small>km</small>
+                    <b>Distance Travelled</b>
+                </div>
+
+                <br/>
+                <br/>
             </div>
-
-            <div id="tile">
-                <p id="rpm">0</p> <small>rpm</small>
-                <!-- <b>Engine RPM</b> -->
-            </div>
-
-            <div id="tile">
-                <p>0</p> <small>degree</small>
-                <b>Engine coolant</b>
-            </div>
-
-            <div id="tile">
-                <p>0</p> <small>degrees</small>
-                <b>Intake Air</b>
-            </div>
-
-
         </ons-page>
     </template>
 
@@ -568,11 +711,14 @@
     <script>
         // document.addEventListener('deviceready', function () {
         let isConnected = false;
+        let moderate_crash_reports_log = []
+        let severe_crash_reports_log = []
 
         function connect(deviceId) {
             bluetoothSerial.connect(deviceId, () => {
                 isConnected = true;
                 document.getElementById('status').textContent = 'Connected';
+                document.getElementById('control-area').style = 'opacity:1!important;';
             }, () => {
                 isConnected = false;
                 document.getElementById('status').textContent = 'Connection failed';
@@ -612,6 +758,7 @@
 
                 if (mode === '0C' && pid === '010C') return ((A * 256 + B) / 4).toFixed(0); // RPM
                 if (mode === '0D' && pid === '010D') return A; // Speed
+                if (mode === '2F' && pid === '012F') return ((A * 100) / 255).toFixed(1); // Fuel Level
             }
             return 'N/A';
         }
@@ -621,12 +768,15 @@
 
             const rpmData = await sendPID('010C');
             const speedData = await sendPID('010D');
+            const fuelData = await sendPID('012F');
 
             const rpm = parseResponse('010C', rpmData);
             const speed = parseResponse('010D', speedData);
+            const fuel = parseResponse('012F', fuelData);
 
             document.getElementById('rpm').textContent = rpm;
             document.getElementById('speed').textContent = speed;
+            document.getElementById('fuel').textContent = fuel;
         }
 
         // document.getElementById('connect').onclick = () => {
@@ -644,6 +794,111 @@
 
         setInterval(update, 1500);
         // });
+
+        document.addEventListener("deviceready", function () {
+            startCrashDetection();
+        }, false);
+
+        // Start crash detection script
+        function startCrashDetection() {
+            // Start watching accelerometer for crash detection
+            var crashDetectionWatchID = navigator.accelerometer.watchAcceleration(
+                crashDetection_onSuccess,
+                crashDetection_onError,
+                { frequency: 200 } // Check 5 times per second
+            );
+        }
+
+        // Success callback: process accelerometer data
+        function crashDetection_onSuccess(acceleration) {
+            var totalAcceleration = Math.sqrt(
+                Math.pow(acceleration.x, 2) +
+                Math.pow(acceleration.y, 2) +
+                Math.pow(acceleration.z, 2)
+            );
+
+            document.getElementById('acc_labl_x').innerHTML = acceleration.x;
+            document.getElementById('acc_labl_y').innerHTML = acceleration.y;
+            document.getElementById('acc_labl_z').innerHTML = acceleration.z;
+
+            // Detect a sudden impact (threshold can be fine-tuned)
+            if (totalAcceleration > 30) {
+                if (totalAcceleration > 60) {
+                    console.log("🚨 Big Crash-like acceleration detected: " + totalAcceleration.toFixed(2));
+                    crashDetection_handleDetectedCrash('Big Crash detected are you ok?','severe',totalAcceleration);
+                } else {
+                    console.log("🚨 Crash-like acceleration detected: " + totalAcceleration.toFixed(2));
+                    crashDetection_handleDetectedCrash('Moderate Crash detected are you ok?','moderate',totalAcceleration);
+                }
+            }
+        }
+
+        // Error callback for accelerometer issues
+        function crashDetection_onError() {
+            console.log("❌ Failed to read accelerometer data");
+        }
+
+        // Handle a potential crash detection event
+        function crashDetection_handleDetectedCrash(crash_status_message,crash_type,acceleration_rate) {
+            navigator.notification.confirm(
+                crash_status_message,
+                function (buttonIndex) {
+                    if (buttonIndex === 1) {
+                        if(crash_type == 'severe'){
+                            severe_crash_reports_log.push({,
+                                'time' : Date.now(),
+                                'severity' : acceleration_rate
+                            });
+                        }else{
+                            moderate_crash_reports_log.push({
+                                'time' : Date.now(),
+                                'severity' : acceleration_rate
+                            });
+                        }
+                        alert('pushed crash report!');
+                        // crashDetection_sendEmergencyAlert();
+                    } else {
+                        console.log("🚫 User dismissed the crash alert");
+                    }
+                },
+                "Emergency Alert",
+                ["Yes", "No"]
+            );
+        }
+
+        // Send emergency data to contacts or backend
+        function crashDetection_sendEmergencyAlert() {
+            console.log("📡 Attempting to send emergency data...");
+
+            navigator.geolocation.getCurrentPosition(
+                crashDetection_onLocationSuccess,
+                crashDetection_onLocationError,
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000
+                }
+            );
+        }
+
+        // Location successfully retrieved
+        function crashDetection_onLocationSuccess(position) {
+            var latitude = position.coords.latitude;
+            var longitude = position.coords.longitude;
+
+            var message = `Crash detected at https://maps.google.com/?q=${latitude},${longitude}`;
+
+            alert("Emergency message:\n" + message);
+
+            // TODO: Send SMS or backend request
+            // e.g. crashDetection_sendSMS(message);
+            // or crashDetection_sendToServer(message);
+        }
+
+        // Location retrieval failed
+        function crashDetection_onLocationError(error) {
+            alert("❗ Could not get location. Error: " + error.message);
+        }
+
     </script>
 </body>
 

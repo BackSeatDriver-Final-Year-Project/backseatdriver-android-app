@@ -15,8 +15,11 @@
   "devDependencies": {
     "cordova-android": "^13.0.0",
     "cordova-plugin-battery-status": "^2.0.3",
+    "cordova-plugin-device-motion": "^2.0.1",
+    "cordova-plugin-dialogs": "^2.0.2",
     "cordova-plugin-geolocation": "^5.0.0",
-    "cordova-plugin-vibration": "^3.1.1"
+    "cordova-plugin-vibration": "^3.1.1",
+    "cordova-sms-plugin": "^1.0.4"
   },
   "cordova": {
     "platforms": [
@@ -26,7 +29,10 @@
       "cordova-plugin-bluetooth-serial": {},
       "cordova-plugin-geolocation": {},
       "cordova-plugin-battery-status": {},
-      "cordova-plugin-vibration": {}
+      "cordova-plugin-vibration": {},
+      "cordova-plugin-device-motion": {},
+      "cordova-plugin-dialogs": {},
+      "cordova-sms-plugin": {}
     }
   },
   "dependencies": {
