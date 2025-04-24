@@ -20,6 +20,50 @@
         ons-tab[active] {
             box-shadow: 0 6px 5px -4px #c3d600 !important;
         }
+
+        #connect {
+            background: linear-gradient(to bottom, #2d0b4a, #4a1c6f) !important;
+            width: 95%;
+            margin: 0 auto;
+        }
+
+        .pulsing-list {
+            list-style: none;
+            padding-left: 1.5em;
+        }
+
+        .pulsing-list li {
+            position: relative;
+        }
+
+        .pulsing-list li::before {
+            content: '';
+            position: absolute;
+            left: -1.2em;
+            top: 0.4em;
+            width: 0.6em;
+            height: 0.6em;
+            background-color: green;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.5);
+                opacity: 0.5;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 
@@ -71,27 +115,49 @@
         <ons-page>
             <br />
 
-            <button id="connect" class="button button--large--cta" style="width: 95%; margin: 0 auto;"
+
+            <ul class="pulsing-list" style="margin-left:20%; width: 60%; font-size: 1.3em;">
+                <li>
+                    <p id="status">Not connected</p>
+                </li>
+            </ul>
+
+            <button id="connect" class="button button--large--cta"
+                style="background: linear-gradient(to bottom, #2d0b4a, #4a1c6f)!important; width: 95%; margin: 0 auto;"
                 onclick="connect_btn()">+ Connect to a
                 bluetooth
                 module</button>
+
             <br />
 
-            <p id="status">Not connected</p>
+            <button disabled id="diconnect" class="button button--large--cta"
+                style="background: linear-gradient(0deg, rgb(139, 0, 0), rgb(255, 77, 77))!important; width: 95%; margin: 0 auto;"
+                onclick="connect_btn()">Disconnect</button>
+            <br />
 
-            <div id="control-area" style="opacity: 0.5;">
+
+            <div id="control-area" style="opacity: 0.5; display: none;">
 
 
-                <label>X Axis</label><b id="acc_labl_x">0</b><br />
-                <label>Y Axis</label><b id="acc_labl_y">0</b><br />
-                <label>Z Axis</label><b id="acc_labl_z">0</b>
+                <div id="developer" style="display: none;">
 
+                    <label>X Axis</label><b id="acc_labl_x">0</b><br />
+                    <label>Y Axis</label><b id="acc_labl_y">0</b><br />
+                    <label>Z Axis</label><b id="acc_labl_z">0</b>
+                </div>
 
                 <br />
 
                 <div id="map"></div>
 
                 <script>
+
+                    // counters for vehcile safety 
+                    let previous_speed = null;
+                    let hard_accelerations = 0;
+                    let hard_brakes = 0;
+                    let speeding_events = 0;
+
 
                     // counter for distance travelled
                     let distance_travelled_counter = 0;
@@ -111,35 +177,53 @@
 
 
                     function speed_counter() {
-
                         if (isConnected) {
                             let current_speed = Number(document.getElementById('speed').innerHTML);
 
-                            // Caclulate distance travlled this last second
                             if (!Number.isNaN(current_speed)) {
+                                // Distance calculation
                                 distance_travelled_counter += current_speed / 3600;
+
+                                // Hard acceleration / braking
+                                if (previous_speed !== null) {
+                                    let speed_diff = current_speed - previous_speed;
+
+                                    if (speed_diff >= 15) {
+                                        hard_accelerations++;
+                                        console.log("⚡ Hard acceleration detected");
+                                    } else if (speed_diff <= -15) {
+                                        hard_brakes++;
+                                        console.log("🛑 Hard brake detected");
+                                    }
+                                }
+
+                                // Speeding
+                                if (current_speed >= 121) {
+                                    speeding_events++;
+                                    console.log("🚨 Speeding detected");
+                                }
+
+                                previous_speed = current_speed;
                             }
 
                             document.getElementById('distance_travlled_id').innerHTML = distance_travelled_counter.toFixed(2);
 
                             if (current_speed == 0) {
-                                speedometer_hourmeter['idle'] = speedometer_hourmeter['idle'] + 1;
+                                speedometer_hourmeter['idle']++;
                                 return;
                             }
 
-                            keys = Object.keys(speedometer_hourmeter);
+                            let keys = Object.keys(speedometer_hourmeter);
                             for (let i = 0; i < keys.length; i++) {
-                                console.log(keys[i]);
-                                min = Number(keys[i].split(',')[0]);
-                                max = Number(keys[i].split(',')[1]);
-
+                                let min = Number(keys[i].split(',')[0]);
+                                let max = Number(keys[i].split(',')[1]);
                                 if (current_speed >= min && current_speed <= max) {
-                                    speedometer_hourmeter[keys[i]] = speedometer_hourmeter[keys[i]] + 1;
+                                    speedometer_hourmeter[keys[i]]++;
                                 }
                             }
-
                         }
                     }
+
 
                     // Run this every second
                     setInterval(speed_counter, 1000);
@@ -188,7 +272,7 @@
                     // Emit vehicle signal change to the backend via Socket.IO
                     function updateVehicleSignal(value) {
 
-                        if(!isConnected) return;
+                        if (!isConnected) return;
 
                         // Location Limitations
                         const minLat = 53.34; // Min latitude (Dublin area)
@@ -232,8 +316,12 @@
                             ],
                             fuel_usage: fuelUsage_recording,
                             distance_travelled: distance_travelled_counter,
-                            crash_reports : moderate_crash_reports_log,
-                            severe_crash_reports : severe_crash_reports_log
+                            crash_reports: moderate_crash_reports_log,
+                            severe_crash_reports: severe_crash_reports_log,
+                            hard_braking_events: hard_brakes,
+                            hard_acceleration_events: hard_accelerations,
+                            speeding_events: speeding_events,
+
                         };
                         console.log(obdData);
 
@@ -317,8 +405,15 @@
                     <b>Distance Travelled</b>
                 </div>
 
-                <br/>
-                <br/>
+                <div id="tile">🚨 Speeding Events: <span id="speeding_events"></span></div>
+
+                <div id="tile">🛑 Hard Brakes: <span id="brake_events"></span></div>
+
+                <div id="tile">⚡ Hard Accelerations: <span id="accel_events"></span></div>
+
+
+                <br />
+                <br />
             </div>
         </ons-page>
     </template>
@@ -331,22 +426,25 @@
     <template id="settings.html">
         <ons-page>
             <br /><br /><br />
-            <input type="search" value="" placeholder="Search" class="search-input search-input--material"
+            <label>Developer mode
+
+                <input type="checkbox" value="0" onchange="alert('developer mode set')" /></label>
+            <!-- <input type="search" value="" placeholder="Search" class="search-input search-input--material"
                 style="width: 95%; margin: 0 auto; margin-left:10px;"> <br /><br />
 
             <p>Vehicles connected to this account</p>
             <ul class="list list--inset">
-                <!-- <li>My Vehicles</li> -->
-                <li class="list-item list--inset__item list-item--chevron list-item--tappable">
-                    <div class="list-item__center">List Item with Chevron</div>
-                </li>
-                <li class="list-item list--inset__item list-item--chevron list-item--tappable">
-                    <div class="list-item__center">List Item with Chevron</div>
-                </li>
+
+            <li class="list-item list--inset__item list-item--chevron list-item--tappable">
+                <div class="list-item__center">List Item with Chevron</div>
+            </li>
+            <li class="list-item list--inset__item list-item--chevron list-item--tappable">
+                <div class="list-item__center">List Item with Chevron</div>
+            </li>
             </ul>
             <br />
             <button class="button button--large--cta" style="width: 95%; margin: 0 auto; background-color: red;">Log
-                out</button>
+                out</button> -->
         </ons-page>
     </template>
 
@@ -718,9 +816,20 @@
             bluetoothSerial.connect(deviceId, () => {
                 isConnected = true;
                 document.getElementById('status').textContent = 'Connected';
+
+                document.getElementById('connect').style = 'display:none;';
+
+                document.getElementById('diconnect').disabled = false;
+
                 document.getElementById('control-area').style = 'opacity:1!important;';
+                document.getElementById('control-area').style = 'display:unset';
             }, () => {
                 isConnected = false;
+
+                document.getElementById('connect').style = 'display:unset;';
+                document.getElementById('diconnect').disabled = true;
+                document.getElementById('control-area').style = 'display:none';
+
                 document.getElementById('status').textContent = 'Connection failed';
             });
         }
@@ -777,6 +886,11 @@
             document.getElementById('rpm').textContent = rpm;
             document.getElementById('speed').textContent = speed;
             document.getElementById('fuel').textContent = fuel;
+
+            document.getElementById('speeding_events').innerText = speeding_events;
+            document.getElementById('brake_events').innerText = hard_brakes;
+            document.getElementById('accel_events').innerText = hard_accelerations;
+
         }
 
         // document.getElementById('connect').onclick = () => {
@@ -825,10 +939,10 @@
             if (totalAcceleration > 30) {
                 if (totalAcceleration > 60) {
                     console.log("🚨 Big Crash-like acceleration detected: " + totalAcceleration.toFixed(2));
-                    crashDetection_handleDetectedCrash('Big Crash detected are you ok?','severe',totalAcceleration);
+                    crashDetection_handleDetectedCrash('Big Crash detected are you ok?', 'severe', totalAcceleration);
                 } else {
                     console.log("🚨 Crash-like acceleration detected: " + totalAcceleration.toFixed(2));
-                    crashDetection_handleDetectedCrash('Moderate Crash detected are you ok?','moderate',totalAcceleration);
+                    crashDetection_handleDetectedCrash('Moderate Crash detected are you ok?', 'moderate', totalAcceleration);
                 }
             }
         }
@@ -839,20 +953,20 @@
         }
 
         // Handle a potential crash detection event
-        function crashDetection_handleDetectedCrash(crash_status_message,crash_type,acceleration_rate) {
+        function crashDetection_handleDetectedCrash(crash_status_message, crash_type, acceleration_rate) {
             navigator.notification.confirm(
                 crash_status_message,
                 function (buttonIndex) {
                     if (buttonIndex === 1) {
-                        if(crash_type == 'severe'){
+                        if (crash_type == 'severe') {
                             severe_crash_reports_log.push({
-                                'time' : Date.now(),
-                                'severity' : acceleration_rate
+                                'time': Date.now(),
+                                'severity': acceleration_rate
                             });
-                        }else{
+                        } else {
                             moderate_crash_reports_log.push({
-                                'time' : Date.now(),
-                                'severity' : acceleration_rate
+                                'time': Date.now(),
+                                'severity': acceleration_rate
                             });
                         }
                         alert('pushed crash report!');
@@ -888,10 +1002,6 @@
             var message = `Crash detected at https://maps.google.com/?q=${latitude},${longitude}`;
 
             alert("Emergency message:\n" + message);
-
-            // TODO: Send SMS or backend request
-            // e.g. crashDetection_sendSMS(message);
-            // or crashDetection_sendToServer(message);
         }
 
         // Location retrieval failed
