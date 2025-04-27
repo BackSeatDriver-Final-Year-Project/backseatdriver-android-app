@@ -10,61 +10,7 @@
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="cordova.js"></script>
     <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
-    <!-- <script src="js/controls.js"></script> -->
     <link rel="stylesheet" type="text/css" href="style/styles.css" />
-    <style>
-        #map {
-            min-height: 200px;
-        }
-
-        ons-tab[active] {
-            box-shadow: 0 6px 5px -4px #c3d600 !important;
-        }
-
-        #connect {
-            background: linear-gradient(to bottom, #2d0b4a, #4a1c6f) !important;
-            width: 95%;
-            margin: 0 auto;
-        }
-
-        .pulsing-list {
-            list-style: none;
-            padding-left: 1.5em;
-        }
-
-        .pulsing-list li {
-            position: relative;
-        }
-
-        .pulsing-list li::before {
-            content: '';
-            position: absolute;
-            left: -1.2em;
-            top: 0.4em;
-            width: 0.6em;
-            height: 0.6em;
-            background-color: green;
-            border-radius: 50%;
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0% {
-                transform: scale(1);
-                opacity: 1;
-            }
-
-            50% {
-                transform: scale(1.5);
-                opacity: 0.5;
-            }
-
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-    </style>
 </head>
 
 <body>
@@ -400,8 +346,8 @@
                     }
 
                 </script>
-
-                <label>LIVE STREAM </label>
+                <br /><br />
+                <label>OBD-II Data </label>
                 <hr />
 
                 <div id="tile">
@@ -437,33 +383,10 @@
         </ons-page>
     </template>
 
-    <!-- end of test -->
-
-
-
-
     <template id="settings.html">
         <ons-page>
             <br /><br /><br />
-            <label>Developer mode
 
-                <input type="checkbox" value="0" onchange="alert('developer mode set')" /></label>
-            <!-- <input type="search" value="" placeholder="Search" class="search-input search-input--material"
-                style="width: 95%; margin: 0 auto; margin-left:10px;"> <br /><br />
-
-            <p>Vehicles connected to this account</p>
-            <ul class="list list--inset">
-
-            <li class="list-item list--inset__item list-item--chevron list-item--tappable">
-                <div class="list-item__center">List Item with Chevron</div>
-            </li>
-            <li class="list-item list--inset__item list-item--chevron list-item--tappable">
-                <div class="list-item__center">List Item with Chevron</div>
-            </li>
-            </ul>
-            <br />
-            <button class="button button--large--cta" style="width: 95%; margin: 0 auto; background-color: red;">Log
-                out</button> -->
         </ons-page>
     </template>
 
@@ -472,7 +395,6 @@
             <ons-toolbar>
                 <div class="left">
                     <ons-back-button>Home</ons-back-button>
-                    <!-- <img style="padding:10px; background:black; width:100px;" src="https://www.monaghanwhiskeysociety.com/wp-content/uploads/2023/11/aughey-screens-logo.png">  -->
                 </div>
                 <div class="center"></div>
             </ons-toolbar>
@@ -481,7 +403,7 @@
                 <ons-icon id="pull-hook-icon" size="22px" class="pull-hook-content" icon="fa-arrow-down"></ons-icon>
             </ons-pull-hook>
 
-            <!-- <p>Aughey Screens have not yet responded to this quote - please come back later</p> -->
+
 
             <div id="wrapper">
                 <h1 id="card-title">Title</h1>
@@ -534,13 +456,7 @@
                 <hr>
                 <div id="iframe-section">
                 </div>
-                <!-- <input type="submit" value="purchase"/> -->
             </div>
-
-            <!-- <ons-list id="kitten-list">
-                <ons-list-header>Pull to refresh</ons-list-header>
-            </ons-list> -->
-
 
             <script>
                 ons.getScriptPage().onInit = function () {
@@ -911,13 +827,6 @@
             document.getElementById('accel_events').innerText = hard_accelerations;
 
         }
-
-        // document.getElementById('connect').onclick = () => {
-        //     alert('hello world');
-        //     bluetoothSerial.list(devices => {
-        //         if (devices.length > 0) connect(devices[0].id);
-        //     });
-        // };
 
         function connect_btn() {
             bluetoothSerial.list(devices => {
