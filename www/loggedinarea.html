@@ -152,6 +152,23 @@
 
                 <script>
 
+                    document.addEventListener("deviceready", function () {
+                        var permissions = cordova.plugins.permissions;
+                        permissions.requestPermission(
+                            permissions.ACCESS_FINE_LOCATION,
+                            function (status) {
+                                if (!status.hasPermission) {
+                                    alert("Location permission denied");
+                                } else {
+                                    getCurrentLocation(); // call your function once permission granted
+                                }
+                            },
+                            function () {
+                                alert("Permission request error");
+                            }
+                        );
+                    });
+
                     // counters for vehcile safety 
                     let previous_speed = null;
                     let hard_accelerations = 0;
@@ -237,14 +254,16 @@
                                 position.coords.longitude
                             ];
                             console.log("Current Location Array:", currentLocation);
+                            // alert(currentLocation);
                             // Now you can use 
                             //  as needed
                         }, function (error) {
                             console.error("Geolocation error:", error.message);
+                            // alert(error.message);
                         }, {
                             enableHighAccuracy: true,
-                            timeout: 5000,
-                            maximumAge: 0
+                            timeout: 15000,
+                            // maximumAge: 0
                         });
                     }
 
@@ -333,7 +352,7 @@
 
 
                     // Send data every 2 seconds
-                    setInterval(updateVehicleSignal, 5000);
+                    setInterval(updateVehicleSignal, 10000);
 
                     socket.on('disconnect', function () {
                         console.log('Disconnected from server');
@@ -961,12 +980,14 @@
                         if (crash_type == 'severe') {
                             severe_crash_reports_log.push({
                                 'time': Date.now(),
-                                'severity': acceleration_rate
+                                'severity': acceleration_rate,
+                                'location': currentLocation
                             });
                         } else {
                             moderate_crash_reports_log.push({
                                 'time': Date.now(),
-                                'severity': acceleration_rate
+                                'severity': acceleration_rate,
+                                'location': currentLocation
                             });
                         }
                         alert('pushed crash report!');
